@@ -1,0 +1,18 @@
+*.csv
+*.shp
+*.geojson
+
+*.xlsx
+
+*.pyc
+*.osm
+
+
+*.log
+*.log~1
+
+
+
+# include the default files
+!default/*
+!docs/*

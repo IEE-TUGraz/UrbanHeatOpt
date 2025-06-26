@@ -1,0 +1,1 @@
+{"pCostHNS": 100.0, "pCostPumping": 1e-06, "pTsupply": 55.0, "pTreturn": 35.0, "pPipeCostIni": 32.0, "pMassFlowIni": 0.6, "pPipeCostsSlope": 0.018, "param_cluster_size": 80.0, "cost_DH_connect_building": 8.5, "cost_DH_connect_area": 4e-05, "cost_DH_connect_power": 6.5, "daily_hot_water_demand": 3.0, "allow_double_heating": 0.0}

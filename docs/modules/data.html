@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data module &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=40be6288"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="utils module" href="utils.html" />
+    <link rel="prev" title="visualisation module" href="visualisation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="prepare_geodata.html">prepare_geodata module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hd_time_series_generator.html">hd_time_series_generator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clustering.html">clustering module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualisation.html">visualisation module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">data module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data.generate_new_case_study"><code class="docutils literal notranslate"><span class="pre">generate_new_case_study()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.generate_new_scenario"><code class="docutils literal notranslate"><span class="pre">generate_new_scenario()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_config"><code class="docutils literal notranslate"><span class="pre">load_config()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_cost_parameter"><code class="docutils literal notranslate"><span class="pre">load_cost_parameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_data_from_disk"><code class="docutils literal notranslate"><span class="pre">load_data_from_disk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_model_data"><code class="docutils literal notranslate"><span class="pre">load_model_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_solar_gain_data"><code class="docutils literal notranslate"><span class="pre">load_solar_gain_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.load_temp_data"><code class="docutils literal notranslate"><span class="pre">load_temp_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.prepare_parameter_file"><code class="docutils literal notranslate"><span class="pre">prepare_parameter_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data.read_output_from_disk"><code class="docutils literal notranslate"><span class="pre">read_output_from_disk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">data module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-data">
+<span id="data-module"></span><h1>data module<a class="headerlink" href="#module-data" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="data.generate_new_case_study">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">generate_new_case_study</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data.html#generate_new_case_study"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.generate_new_case_study" title="Link to this definition"></a></dt>
+<dd><p>Generates a new case study folder with default files and default values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>casestudy</strong> (<em>str</em>) -- name of the case study to be created</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.generate_new_scenario">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">generate_new_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data.html#generate_new_scenario"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.generate_new_scenario" title="Link to this definition"></a></dt>
+<dd><p>Generates a new scenario folder with default files and default values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>casestudy</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>scenario_dir</strong> (<em>str</em>) -- name of the scenario directory to be created</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_config">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/data.html#load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_config" title="Link to this definition"></a></dt>
+<dd><p>loads the configuration file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>configuration dictionary</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_cost_parameter">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_cost_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/data.html#load_cost_parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_cost_parameter" title="Link to this definition"></a></dt>
+<dd><p>loads the cost and parameters for tje scenario from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>casestudy</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>scenario</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the costs and parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_data_from_disk">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_data_from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/data.html#load_data_from_disk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_data_from_disk" title="Link to this definition"></a></dt>
+<dd><p>loads the data required for the optimization model from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>casestudy</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>scenario</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the dataframes and geodataframes for the optimization model</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_model_data">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_model_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/data.html#load_model_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_model_data" title="Link to this definition"></a></dt>
+<dd><p>Loads the model input data from the scenario path. - not used anymore, use load_data_from_disk instead</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scenario_path</strong> (<em>str</em>) -- path to the correct scenario folder</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the dataframes and geodataframes for the optimization model</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_solar_gain_data">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_solar_gain_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/data.html#load_solar_gain_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_solar_gain_data" title="Link to this definition"></a></dt>
+<dd><p>Loads the solar gain data for the scenario from disk.</p>
+<p>Solar gain data here referes to the solar irradiation in W/m2 data that is used to calculate the solar gain for the buildings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe containing the solar gain data and the time index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.load_temp_data">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">load_temp_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/data.html#load_temp_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.load_temp_data" title="Link to this definition"></a></dt>
+<dd><p>Loads the outside temperature data for the scenario from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe containing the outside temperature data and the time index</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.prepare_parameter_file">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">prepare_parameter_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_study_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/data.html#prepare_parameter_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.prepare_parameter_file" title="Link to this definition"></a></dt>
+<dd><p>Prepares the parameter file for the scenario by loading the parameter xlsx file and saving it as a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>case_study_name</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>scenario_name</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data.read_output_from_disk">
+<span class="sig-prename descclassname"><span class="pre">data.</span></span><span class="sig-name descname"><span class="pre">read_output_from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_study_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="../_modules/data.html#read_output_from_disk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data.read_output_from_disk" title="Link to this definition"></a></dt>
+<dd><p>Reads the output data of the optimisation model from the disk for the given case study and model name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>case_study_name</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) -- name of the scenario</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dictionary containing the output dataframes from the optimization model</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="visualisation.html" class="btn btn-neutral float-left" title="visualisation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utils.html" class="btn btn-neutral float-right" title="utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+
+::
+
+   📁 project_root/
+   ├── 📁 default/                        # Default input templates used for scenario configuration
+   │   ├── 📊 input_ParameterCosts.xlsx          # Default cost parameters (e.g. piping, investment)
+   │   ├── 📊 input_HeatGenerationUnits.xlsx     # Default waste heat unit definitions
+   │   └── …
+   ├── 📁 Conda-Activation-Scripts/       # Activation script(s) for setting up the Python environment
+   ├── 📁 docs/                           # Sphinx documentation source files
+   ├── 📁 logs/                           # Log files from optimization model runs
+   ├── 📁 [case_study_name]/              # Top-level folder for one spatial region (case study)
+   │   ├── 📁 general_parameters/         # Static settings specific to this case study
+   │   │   ├── 📁 building_energy_data/           # Heat demand by building type and structure
+   │   │   └── 📁 MCMC_data/                      # Transition matrices, weather, and solar data
+   │   ├── 🌍 Building_Data.geojson              # Spatial data for the region (from OSM or other sources)
+   │   ├── 📊 Building_TS.csv                    # Generated heat demand time series
+   │   └── 📁 scenarios/					# directory for all scenarios
+   │       ├──📁 [scenario_name]/            # One or more scenarios for analysis within a case study
+   │       │  ├── 📁 data/                          # Scenario-ready data for optimization
+   │       │  ├── 📁 input/                         # User-defined, scenario-specific parameters
+   │       │  │   ├── 📊 input_HeatGenerationUnits.xlsx  # Waste heat source definitions
+   │       │  │   ├── 📊 input_ParameterCosts.xlsx       # Cost and design parameters
+   │       │  │   └── 📊 input_WastHeatProfiles.xlsx     # Temporal profiles for waste heat
+   │       │  ├── 📁 output/                        # Raw output files from the optimization model
+   │	   │  ├── 📁 plots/							# Standard plots for visualisation of results
+   │       │  └── 📁 expost/                        # Post-processing and analysis results
+   │       └── …
+   ├── ⚙️ _config.yaml                     # Central configuration for file paths and defaults
+   ├── ⚙️ environment.yaml                 # Conda environment requirements
+   ├── 🖥️ main.ipynb                      # Main notebook to run the full data workflow
+   ├── 🐍 prepare_geodata.py              # Module: Prepare and download geospatial data
+   ├── 🐍 hd_time_series_generator.py     # Module: Generate stochastic heat demand time series
+   ├── 🐍 clustering.py                   # Module: Cluster demand and propose network layouts
+   ├── 🐍 model.py                        # Module: Optimization model for energy system configuration
+   ├── 🐍 data.py                         # Module: Utilities for data handling and preprocessing
+   ├── 🐍 utils.py                        # Module: General helper functions
+   └── 🐍 visualisation.py                # Module: Visual output and plotting

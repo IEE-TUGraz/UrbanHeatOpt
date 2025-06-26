@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>prepare_geodata module &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=40be6288"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="hd_time_series_generator module" href="hd_time_series_generator.html" />
+    <link rel="prev" title="Modules" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">prepare_geodata module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.adjust_num_of_dwelling"><code class="docutils literal notranslate"><span class="pre">adjust_num_of_dwelling()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.calc_heating_hours"><code class="docutils literal notranslate"><span class="pre">calc_heating_hours()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.define_setpontTemp"><code class="docutils literal notranslate"><span class="pre">define_setpontTemp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.estimate_data_osm"><code class="docutils literal notranslate"><span class="pre">estimate_data_osm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.estimate_internal_gainfactor"><code class="docutils literal notranslate"><span class="pre">estimate_internal_gainfactor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.estimate_local_heat_prod_costs"><code class="docutils literal notranslate"><span class="pre">estimate_local_heat_prod_costs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.estimate_solar_gainfactor"><code class="docutils literal notranslate"><span class="pre">estimate_solar_gainfactor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.estimate_thermal_properties"><code class="docutils literal notranslate"><span class="pre">estimate_thermal_properties()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.extract_relevat_data"><code class="docutils literal notranslate"><span class="pre">extract_relevat_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.generate_complete_geodataset"><code class="docutils literal notranslate"><span class="pre">generate_complete_geodataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.geodesic_point_buffer"><code class="docutils literal notranslate"><span class="pre">geodesic_point_buffer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.get_geodata_from_place"><code class="docutils literal notranslate"><span class="pre">get_geodata_from_place()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.get_geodata_from_polygon"><code class="docutils literal notranslate"><span class="pre">get_geodata_from_polygon()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.get_spec_HD"><code class="docutils literal notranslate"><span class="pre">get_spec_HD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.get_yearly_HD"><code class="docutils literal notranslate"><span class="pre">get_yearly_HD()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.merge_other_data"><code class="docutils literal notranslate"><span class="pre">merge_other_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.polygon_by_circle"><code class="docutils literal notranslate"><span class="pre">polygon_by_circle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.remove_zero_area_buildings"><code class="docutils literal notranslate"><span class="pre">remove_zero_area_buildings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prepare_geodata.write_buildingdata_to_disk"><code class="docutils literal notranslate"><span class="pre">write_buildingdata_to_disk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hd_time_series_generator.html">hd_time_series_generator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="clustering.html">clustering module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualisation.html">visualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">prepare_geodata module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/prepare_geodata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-prepare_geodata">
+<span id="prepare-geodata-module"></span><h1>prepare_geodata module<a class="headerlink" href="#module-prepare_geodata" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.adjust_num_of_dwelling">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">adjust_num_of_dwelling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#adjust_num_of_dwelling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.adjust_num_of_dwelling" title="Link to this definition"></a></dt>
+<dd><p>Set the number of dwellings to 0 for non residential buildings and limit the number of dwellings to a maximum of 500.</p>
+<p>The number of dwellings is set to 0 for non residential buildings (e.g. PCI) and the number of dwellings is limited to a maximum of 500. This is done to avoid unrealistic values for the number of dwellings.
+In the subsequent analysis, the number of dwellings is used to calculate the specific heating demand and the yearly heating demand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.calc_heating_hours">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">calc_heating_hours</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_study_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">21.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Tsetback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#calc_heating_hours"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.calc_heating_hours" title="Link to this definition"></a></dt>
+<dd><p>Calculate the heating degree hours based on the outside temperature and the setpoint temperature.</p>
+<p>The heating degree hours are calculated for the whole year, for a reference actitive occupancy profile.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>case_study_name</strong> (<em>str</em>) -- Name of the case study, used to load the temperature data</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- Config dictionary</p></li>
+<li><p><strong>Tset</strong> (<em>float</em><em>, </em><em>optional</em>) -- Setpoint temperature for buildings, defaults to 21</p></li>
+<li><p><strong>Tsetback</strong> (<em>float</em><em>, </em><em>optional</em>) -- Setback temperature for buildings, defaults to 18</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of heating degree hours for the whole year in °C*h</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.define_setpontTemp">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">define_setpontTemp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp_setpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_setpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp_setback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">17.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_setback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#define_setpontTemp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.define_setpontTemp" title="Link to this definition"></a></dt>
+<dd><p>Define the setpoint temperature and the setback temperature for the buildings.</p>
+<p>The values are randomly generated based on a normal distribution around the mean values. If real data is available, this function can be replaced by the real data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p></li>
+<li><p><strong>temp_setpoint</strong> (<em>float</em><em>, </em><em>optional</em>) -- mean value for the setpoint temperature, defaults to 22.0</p></li>
+<li><p><strong>std_setpoint</strong> (<em>float</em><em>, </em><em>optional</em>) -- standard deviation for the setpoint temperature, defaults to 2.0</p></li>
+<li><p><strong>temp_setback</strong> (<em>float</em><em>, </em><em>optional</em>) -- mean value for the setback temperature, defaults to 17.0</p></li>
+<li><p><strong>std_setback</strong> (<em>float</em><em>, </em><em>optional</em>) -- standard deviation for the setback temperature, defaults to 2.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.estimate_data_osm">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">estimate_data_osm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#estimate_data_osm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.estimate_data_osm" title="Link to this definition"></a></dt>
+<dd><p>Estimate the required data for the subsequent analysis (e.g. number of floors) just from the OSM data.</p>
+<p>The function estimates the required data for subsequent analysis. Where not sufficient data is available, the data is estimated from the available data. The estimation is based on the OSM data and might not be accurate, depending on the quality of the OSM data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the relevant data, exracted from the raw geodata.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing the estimated building properties for further analysis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.estimate_internal_gainfactor">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">estimate_internal_gainfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain_per_dwelling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.12</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#estimate_internal_gainfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.estimate_internal_gainfactor" title="Link to this definition"></a></dt>
+<dd><p>Estimate the internal gain factor for the buildings.</p>
+<p>The gain is scaled per dwelling, with the input parameter gain_per_dwelling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p></li>
+<li><p><strong>gain_per_dwelling</strong> (<em>float</em><em>, </em><em>optional</em>) -- value for the internal gain per dwelling in kW/dwelling, defaults to 0.2</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.estimate_local_heat_prod_costs">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">estimate_local_heat_prod_costs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_per_kWh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#estimate_local_heat_prod_costs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.estimate_local_heat_prod_costs" title="Link to this definition"></a></dt>
+<dd><p>Estimate the local heating production costs based on the cost per kWh.</p>
+<p>The costs are randomly generated based on a normal distribution around the mean value. If real data is available, this function can be replaced by the real data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p></li>
+<li><p><strong>cost_per_kWh</strong> (<em>float</em><em>, </em><em>optional</em>) -- mean value for the heating costs per kWh, defaults to 0.15</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.estimate_solar_gainfactor">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">estimate_solar_gainfactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_fraction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#estimate_solar_gainfactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.estimate_solar_gainfactor" title="Link to this definition"></a></dt>
+<dd><p>Estimate the solar gain factor for the buildings.</p>
+<p>The gain is scaled per dwelling, with the input parameter window_fraction. If more accurate data is available, this function can be replaced by the real data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p></li>
+<li><p><strong>window_fraction</strong> (<em>float</em><em>, </em><em>optional</em>) -- share of window area of total facade area, defaults to 0.1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.estimate_thermal_properties">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">estimate_thermal_properties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heatinghours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speHeatStorCap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.04</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_to_area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#estimate_thermal_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.estimate_thermal_properties" title="Link to this definition"></a></dt>
+<dd><p>Estimate the thermal properties of the buildings based on the specific heating demand and the heated area.</p>
+<p>The estimated thermal properties are scaled up for the whole building, that means all parameters refere to the total building.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p></li>
+<li><p><strong>heatinghours</strong> (<em>float</em><em>, </em><em>optional</em>) -- Number of heating hours per year. Sumed up the temperature difference between setpoint and outside temperature for all hours of the year., defaults to 50000</p></li>
+<li><p><strong>speHeatStorCap</strong> (<em>float</em><em>, </em><em>optional</em>) -- specific heat storage capacity of the building material in kWh/m²K of a wall of average thickness, defaults to 0.04</p></li>
+<li><p><strong>surface_to_area</strong> (<em>float</em><em>, </em><em>optional</em>) -- float ratio of thermal active area of the building (i.e. walls, roof, floor) to the ground area of the building (avoid double counting of indoor walls), defaults to 2.5</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.extract_relevat_data">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">extract_relevat_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#extract_relevat_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.extract_relevat_data" title="Link to this definition"></a></dt>
+<dd><p>Extract the relevant data from the raw geodata that are needed for further analysis.</p>
+<p>Data that are not available are set to a default value, and a warning is printed. Observe the output in the console to check for missing data and data quality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame with the raw geodata obtained from OSM</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing the relevant data for further analysis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.generate_complete_geodataset">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">generate_complete_geodataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">casstudy_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#generate_complete_geodataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.generate_complete_geodataset" title="Link to this definition"></a></dt>
+<dd><p>Run a complete case study for a given location.</p>
+<p>The function generates a new case study folder if the folder does not exist yet.
+It then loads the building data from OpenStreetMap and processes it to get the relevant data.
+The function estimates the thermal properties of the buildings and writes the data to disk.
+The function returns the processed building data as a GeoDataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>casstudy_name</strong> (<em>str</em>) -- Name of the case study</p></li>
+<li><p><strong>location</strong> (<em>str</em><em> or </em><em>shapely.geometry.polygon.Polygon</em>) -- Geographical location of the case study. Can be a polygon (must be polygon) or a place name (string).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing the building data for the case study with all properites.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.geodesic_point_buffer">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">geodesic_point_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">km</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#geodesic_point_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.geodesic_point_buffer" title="Link to this definition"></a></dt>
+<dd><p>Perform a geodesic point buffer around a given latitude and longitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) -- Latitude of the center point.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) -- Longitude of the center point.</p></li>
+<li><p><strong>km</strong> (<em>float</em>) -- Radius of the buffer in kilometers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of coordinates representing the buffer around the point.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.get_geodata_from_place">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">get_geodata_from_place</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">place_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#get_geodata_from_place"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.get_geodata_from_place" title="Link to this definition"></a></dt>
+<dd><p>Get geodata from a place name using the OSMnx library.</p>
+<p>This function retrieves geodata from a place name using the OSMnx library. The data is filtered for buildings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>place_name</strong> (<em>str</em>) -- Location/Place name to get the geodata for. The name of the place must be a valid OSM place name.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing building data for the specified place. If no data is found, None is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.get_geodata_from_polygon">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">get_geodata_from_polygon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">polygon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polygon</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#get_geodata_from_polygon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.get_geodata_from_polygon" title="Link to this definition"></a></dt>
+<dd><p>Get geodata from a polygon using the OSMnx library.</p>
+<p>This function retrieves geodata from a polygon using the OSMnx library. The data is filtered for buildings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>polygon</strong> (<em>shapely.geometry.polygon.Polygon</em>) -- A shapely polygon object representing the area of interest. The polygon must be a valid shapely polygon.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A GeoDataFrame containing building data for the specified polygon. If no data is found, None is returned.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.get_spec_HD">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">get_spec_HD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_spec_HD</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#get_spec_HD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.get_spec_HD" title="Link to this definition"></a></dt>
+<dd><p>Get the specific heating demand of the buildings.</p>
+<p>The specific heating demand is obtained from the excel file containing the specific heating demand data.
+The country speccific data can be obtained from the TABULA webtool: <a class="reference external" href="https://webtool.building-typology.eu/#bm">https://webtool.building-typology.eu/#bm</a> and has to be adjusted to the format of the excel file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data, including the year of construction and the building category.</p></li>
+<li><p><strong>path_spec_HD</strong> (<em>str</em>) -- Path to the excel file containing the specific heating demand data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.get_yearly_HD">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">get_yearly_HD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#get_yearly_HD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.get_yearly_HD" title="Link to this definition"></a></dt>
+<dd><p>Calculate the yearly heating demand based on the specific heating demand and the heated area</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing specific heating demand and heated area.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.merge_other_data">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">merge_other_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#merge_other_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.merge_other_data" title="Link to this definition"></a></dt>
+<dd><p>This function is a dummy to merge in other data sources like cadastre data if available.</p>
+<p>If more accurate building data is available, it can be merged in here. The function is a placeholder for future development and does not do anything at the moment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing the updated and merged building data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.polygon_by_circle">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">polygon_by_circle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Polygon</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#polygon_by_circle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.polygon_by_circle" title="Link to this definition"></a></dt>
+<dd><p>Generate a polygon representing a circle around a given latitude and longitude.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lat</strong> (<em>float</em>) -- Latitude of the center point.</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) -- Longitude of the center point.</p></li>
+<li><p><strong>radius</strong> (<em>float</em>) -- Radius of the circle in kilometers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> -- If the radius is negative or greater than 20 km.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a polygon representing the circle in the format of a shapely polygon.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>shapely.geometry.polygon.Polygon</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.remove_zero_area_buildings">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">remove_zero_area_buildings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeoDataFrame</span></span></span><a class="reference internal" href="../_modules/prepare_geodata.html#remove_zero_area_buildings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.remove_zero_area_buildings" title="Link to this definition"></a></dt>
+<dd><p>Removes buildings with a projected area of 0.</p>
+<p>For buildings with zero area, no further analysis is possible. The buildings are removed from the GeoDataFrame to avoid errors in the subsequent analysis.
+Most buildings without a projected area might be buildings that are not residential or not heated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_in</strong> (<em>gpd.GeoDataFrame</em>) -- GeoDataFrame containing the building data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new GeoDataFrame containing the building data without buildings with a projected area of 0.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gpd.GeoDataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prepare_geodata.write_buildingdata_to_disk">
+<span class="sig-prename descclassname"><span class="pre">prepare_geodata.</span></span><span class="sig-name descname"><span class="pre">write_buildingdata_to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/prepare_geodata.html#write_buildingdata_to_disk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prepare_geodata.write_buildingdata_to_disk" title="Link to this definition"></a></dt>
+<dd><p>Write the building data to disk as a GeoJSON file.</p>
+<p>The function checks if the directory for the case study exists and creates it if not. The building data is then written to disk in the specified format.
+:param gdf_in: GeoDataFrame containing the building data
+:type gdf_in: gpd.GeoDataFrame
+:param casestudy: name of the casestudy
+:type casestudy: str
+:param config: configuration dictionary
+:type config: dict</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hd_time_series_generator.html" class="btn btn-neutral float-right" title="hd_time_series_generator module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

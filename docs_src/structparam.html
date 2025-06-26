@@ -1,0 +1,784 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Structure and Settings &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=40be6288"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Run a Case Study" href="runcasestudy.html" />
+    <link rel="prev" title="Quickstart" href="quickstart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Project Structure and Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#organizational-structure-case-studies-and-scenarios">Organizational Structure: Case Studies and Scenarios</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#folder-structure">Folder Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-and-input-parameters">Settings and Input Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#file-and-folder-naming">File and Folder Naming</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#default-files">Default Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#building-typology">Building Typology</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#outside-temperature">Outside Temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solar-gain">Solar Gain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transition-matrices">Transition Matrices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#heat-generation-units">Heat Generation Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#waste-heat-profiles">Waste Heat Profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-and-cost-definitions">Parameter and Cost Definitions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-solver">Using the Solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optimization-model-formulation">Optimization Model Formulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sets">Sets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#variables">Variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#objective-function">Objective Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#constraints">Constraints</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/index.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Project Structure and Settings</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/structparam.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="project-structure-and-settings">
+<span id="struct-param"></span><h1>Project Structure and Settings<a class="headerlink" href="#project-structure-and-settings" title="Link to this heading"></a></h1>
+<p>In this section, you will find an overview of the project's general structure, the required formats for all input data, and the available settings and parameters you can adjust to customize your analysis.</p>
+<section id="organizational-structure-case-studies-and-scenarios">
+<h2>Organizational Structure: Case Studies and Scenarios<a class="headerlink" href="#organizational-structure-case-studies-and-scenarios" title="Link to this heading"></a></h2>
+<p>The project is structured into two hierarchical levels:</p>
+<ul class="simple">
+<li><p><strong>Case Study</strong>:
+Refers to all analyses of one particular spatial region.
+The first two steps (geodata acquisition and creation of heating demand time series for all buildings) are always related to a case study.
+Each case study can contain several scenarios.</p></li>
+<li><p><strong>Scenario</strong>:
+Refers to a specific analysis within a case study, where different parameters, inputs, and costs are investigated for the same spatial region.
+For each scenario, clustering and optimization can be executed, enabling comparison of, for example, different waste heat sources, temporal profiles, or various cost assumptions.</p></li>
+</ul>
+</section>
+<section id="folder-structure">
+<h2>Folder Structure<a class="headerlink" href="#folder-structure" title="Link to this heading"></a></h2>
+<p>When the script is run with a <code class="docutils literal notranslate"><span class="pre">case_study_name</span></code> or a <code class="docutils literal notranslate"><span class="pre">scenario_name</span></code> that does not yet exist, a new folder structure is generated.
+It automatically contains all required files with default values.
+The default files are defined in the <code class="docutils literal notranslate"><span class="pre">default</span></code> folder.</p>
+<p>If a script is run again, existing <strong>input</strong> and <strong>parameter</strong> sheets are <strong>not overwritten</strong>.
+Only the <strong>output files</strong> (e.g., results) corresponding to the executed step are updated.</p>
+<p>The general folder structure is organized as follows:</p>
+</section>
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>project_root/
+├── default/                        # Default input templates used for scenario configuration
+│   ├── input_ParameterCosts.xlsx          # Default cost parameters (e.g. piping, investment)
+│   ├── input_HeatGenerationUnits.xlsx     # Default waste heat unit definitions
+│   └── ...
+├── Conda-Activation-Scripts/       # Activation script(s) for setting up the Python environment
+├── docs/                           # Sphinx documentation source files
+├── logs/                           # Log files from optimization model runs
+├── [case_study_name]/              # Top-level folder for one spatial region (case study)
+│   ├── general_parameters/         # Static settings specific to this case study
+│   │   ├── building_energy_data/           # Heat demand by building type and structure
+│   │   └── MCMC_data/                      # Transition matrices, weather, and solar data
+│   ├── Building_Data.geojson              # Spatial data for the region (from OSM or other sources)
+│   ├── Building_TS.csv                    # Generated heat demand time series
+│   └── scenarios/                         # Directory for all scenarios
+│       ├── [scenario_name]/               # One or more scenarios for analysis within a case study
+│       │   ├── data/                      # Scenario-ready data for optimization
+│       │   ├── input/                     # User-defined, scenario-specific parameters
+│       │   │   ├── input_HeatGenerationUnits.xlsx  # Waste heat source definitions
+│       │   │   ├── input_ParameterCosts.xlsx       # Cost and design parameters
+│       │   │   └── input_WastHeatProfiles.xlsx     # Temporal profiles for waste heat
+│       │   ├── output/                    # Raw output files from the optimization model
+│       │   ├── plots/                     # Standard plots for visualisation of results
+│       │   └── expost/                    # Post-processing and analysis results
+│       └── ...
+├── _config.yaml                     # Central configuration for file paths and defaults
+├── environment.yaml                 # Conda environment requirements
+├── main.ipynb                       # Main notebook to run the full data workflow
+├── prepare_geodata.py              # Module: Prepare and download geospatial data
+├── hd_time_series_generator.py     # Module: Generate stochastic heat demand time series
+├── clustering.py                   # Module: Cluster demand and propose network layouts
+├── model.py                        # Module: Optimization model for energy system configuration
+├── data.py                         # Module: Utilities for data handling and preprocessing
+├── utils.py                        # Module: General helper functions
+└── visualisation.py                # Module: Visual output and plotting
+</pre></div>
+</div>
+</section>
+<section id="settings-and-input-parameters">
+<h2>Settings and Input Parameters<a class="headerlink" href="#settings-and-input-parameters" title="Link to this heading"></a></h2>
+<p>This section provides an overview of the project structure, file naming conventions, required input formats, and the adjustable settings and parameters.</p>
+<section id="file-and-folder-naming">
+<h3>File and Folder Naming<a class="headerlink" href="#file-and-folder-naming" title="Link to this heading"></a></h3>
+<p>The file <code class="docutils literal notranslate"><span class="pre">_config.yaml</span></code> specifies the naming of all files and folders used throughout the workflow.
+Be aware: <strong>Changing names retroactively may lead to errors when rerunning previously configured scenarios.</strong></p>
+</section>
+<section id="default-files">
+<h3>Default Files<a class="headerlink" href="#default-files" title="Link to this heading"></a></h3>
+<p>The folder <code class="docutils literal notranslate"><span class="pre">default/</span></code> contains all default input files and parameter sheets used when a new case study or scenario is created.
+To change default values, simply edit the corresponding files — but <strong>do not change the file structure</strong>, as this could break functionality.</p>
+</section>
+<section id="building-typology">
+<h3>Building Typology<a class="headerlink" href="#building-typology" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/general_parameters/building_energy_data/BuildingTypology.xlsx</span></code></p>
+<p>This file defines the annual heating demand in kWh/m²/year for various building types.
+It distinguishes between building age (year of construction) and building use (e.g., residential, commercial).
+You should adjust these values for your specific region and climate zone.</p>
+<ul class="simple">
+<li><p>Source: TABULA Web Tool <a class="reference internal" href="#tabula" id="id1"><span>[Tabula]</span></a>.</p></li>
+<li><p>Custom data can be included for specific communities.</p></li>
+<li><p>Construction year categories can be added or adapted.</p></li>
+</ul>
+</section>
+<section id="outside-temperature">
+<h3>Outside Temperature<a class="headerlink" href="#outside-temperature" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/general_parameters/MCMC_data/outside_temp.xlsx</span></code></p>
+<p>This file contains:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code> column: hourly datetime format (usually 8760 entries per year)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">T_out</span></code> column: hourly outdoor temperature in °C for the case study location</p></li>
+</ul>
+<p>Used to generate time-dependent occupancy and heating profiles.</p>
+<ul class="simple">
+<li><p>Tip: Data can be sourced from Renewables Ninja <a class="reference internal" href="#renewables-ninja" id="id2"><span>[Renewables.ninja]</span></a>..</p></li>
+</ul>
+</section>
+<section id="solar-gain">
+<h3>Solar Gain<a class="headerlink" href="#solar-gain" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/general_parameters/MCMC_data/solar_gain.xlsx</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time</span></code> column: must align with <code class="docutils literal notranslate"><span class="pre">outside_temp.xlsx</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solar_gain</span></code> column: global solar irradiation in W/m²</p></li>
+</ul>
+<p>Used to compute passive solar heat gains per building, scaled with individual factors.</p>
+</section>
+<section id="transition-matrices">
+<h3>Transition Matrices<a class="headerlink" href="#transition-matrices" title="Link to this heading"></a></h3>
+<p>Files:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">transition_matrix_WD.xlsx</span></code> — for weekdays</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transition_matrix_WE.xlsx</span></code> — for weekends</p></li>
+</ul>
+<p>Path: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/general_parameters/MCMC_data/</span></code></p>
+<p>Each matrix provides 144 values per hour (10-minute resolution), representing probabilities for four transition states:</p>
+<ul class="simple">
+<li><p>0→0, 0→1, 1→0, 1→1</p></li>
+</ul>
+<p>These matrices are used to generate stochastic active occupancy profiles.</p>
+<ul class="simple">
+<li><p>Based on Time Use Survey data.</p></li>
+<li><p>See <a class="reference internal" href="#mcmc-process" id="id3"><span>[MCMC-Process]</span></a>.</p></li>
+</ul>
+</section>
+<section id="heat-generation-units">
+<h3>Heat Generation Units<a class="headerlink" href="#heat-generation-units" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/[scenario_name]/input/input_HeatGenerationUnits.xlsx</span></code></p>
+<p>Each row represents a waste heat unit with the following columns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">unit</span></code>: Name (must match a column name in <code class="docutils literal notranslate"><span class="pre">input_WastHeatProfiles.xlsx</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lat</span></code>, <code class="docutils literal notranslate"><span class="pre">lon</span></code>: Coordinates of the unit</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isWH</span></code>, <code class="docutils literal notranslate"><span class="pre">isBoiler</span></code>, <code class="docutils literal notranslate"><span class="pre">isTES</span></code>: Binary (1/0) to define unit type
+- <code class="docutils literal notranslate"><span class="pre">isWH</span></code> = Waste Heat Unit (profile limited)
+- <code class="docutils literal notranslate"><span class="pre">isBoiler</span></code> = Dispatchable boiler (e.g., gas, P2H, HP)
+- <code class="docutils literal notranslate"><span class="pre">isTES</span></code> = Thermal energy storage</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">O&amp;M</span> <span class="pre">and</span> <span class="pre">Fuel</span> <span class="pre">Costs</span></code>: €/kWh (already efficiency-adjusted)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Power</span> <span class="pre">Investment</span> <span class="pre">Costs</span></code>: €/kW (annualized)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Storage</span> <span class="pre">Investment</span> <span class="pre">Costs</span></code>: €/m³ (only for TES)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Storage</span> <span class="pre">loss</span> <span class="pre">rate</span> <span class="pre">%/h</span></code>: Only for TES</p></li>
+</ul>
+</section>
+<section id="waste-heat-profiles">
+<h3>Waste Heat Profiles<a class="headerlink" href="#waste-heat-profiles" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/[scenario_name]/input/input_WastHeatProfiles.xlsx</span></code></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hour</span></code> column: 0–8759</p></li>
+<li><p>One column per unit defined in <code class="docutils literal notranslate"><span class="pre">input_HeatGenerationUnits.xlsx</span></code></p></li>
+<li><p>Values: Maximum thermal output (mass flow) per hour</p></li>
+</ul>
+</section>
+<section id="parameter-and-cost-definitions">
+<h3>Parameter and Cost Definitions<a class="headerlink" href="#parameter-and-cost-definitions" title="Link to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">[case_study_name]/[scenario_name]/input/input_ParameterCosts.xlsx</span></code></p>
+<p>All adjustable technical and financial parameters are defined here:</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">Parameters</span><a class="headerlink" href="#id4" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 15.0%" />
+<col style="width: 35.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Costs for non-supplied heat</p></td>
+<td><p>pCostHNS = 100</p></td>
+<td><p>€/kWh</p></td>
+<td><p>Penalty for unmet demand</p></td>
+</tr>
+<tr class="row-odd"><td><p>Pumping costs</p></td>
+<td><p>pCostPumping = 0.00001</p></td>
+<td><p>€/m³</p></td>
+<td><p>Energy cost for water circulation</p></td>
+</tr>
+<tr class="row-even"><td><p>Supply temperature</p></td>
+<td><p>pTsupply = 90</p></td>
+<td><p>°C</p></td>
+<td><p>Constant level for supply</p></td>
+</tr>
+<tr class="row-odd"><td><p>Return temperature</p></td>
+<td><p>pTreturn = 55</p></td>
+<td><p>°C</p></td>
+<td><p>Constant level for return</p></td>
+</tr>
+<tr class="row-even"><td><p>Pipe base investment cost</p></td>
+<td><p>pPipeCostIni = 14.16</p></td>
+<td><p>€/m</p></td>
+<td><p>Base cost for installing pipes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Initial pipe flow capacity</p></td>
+<td><p>pMassFlowIni = 0.8</p></td>
+<td><p>m³/h</p></td>
+<td><p>Smallest pipe capacity</p></td>
+</tr>
+<tr class="row-even"><td><p>Pipe cost slope</p></td>
+<td><p>pPipeCostsSlope = 0.133</p></td>
+<td><p>€/m·m³/h</p></td>
+<td><p>Cost per flow unit</p></td>
+</tr>
+<tr class="row-odd"><td><p>Number of heat clusters</p></td>
+<td><p>param_cluster_size = 80</p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+<td><p>Number of demand clusters</p></td>
+</tr>
+<tr class="row-even"><td><p>Connection cost per building</p></td>
+<td><p>cost_DH_connect_building = 83.33</p></td>
+<td><p>€/building</p></td>
+<td><p>Fixed connection cost</p></td>
+</tr>
+<tr class="row-odd"><td><p>Area-based network investment</p></td>
+<td><p>cost_DH_connect_area = 1.416</p></td>
+<td><p>€/m²</p></td>
+<td><p>For in-cluster piping</p></td>
+</tr>
+<tr class="row-even"><td><p>Power-based connection cost</p></td>
+<td><p>cost_DH_connect_power = 9.17</p></td>
+<td><p>€/kW</p></td>
+<td><p>Installed capacity cost</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hot water demand</p></td>
+<td><p>daily_hot_water_demand = 5</p></td>
+<td><p>kWh/dwelling/day</p></td>
+<td><p>Constant domestic hot water usage</p></td>
+</tr>
+<tr class="row-even"><td><p>Restrict dual heating</p></td>
+<td><p>allow_double_heating = 0</p></td>
+<td><p>Binary (0/1)</p></td>
+<td><p>0 = buildings connected to district heating may not use decentral heating</p></td>
+</tr>
+</tbody>
+</table>
+<dl>
+<dt>References</dt><dd><div role="list" class="citation-list">
+<div class="citation" id="tabula" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Tabula</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://webtool.building-typology.eu/#bm">https://webtool.building-typology.eu/#bm</a></p>
+</div>
+<div class="citation" id="renewables-ninja" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Renewables.ninja</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.renewables.ninja/">https://www.renewables.ninja/</a></p>
+</div>
+<div class="citation" id="mcmc-process" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">MCMC-Process</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="doi:10.3217/0b20r-jrx54">doi:10.3217/0b20r-jrx54</a></p>
+</div>
+</div>
+</dd>
+</dl>
+</section>
+</section>
+<section id="using-the-solver">
+<h2>Using the Solver<a class="headerlink" href="#using-the-solver" title="Link to this heading"></a></h2>
+<p>The optimization model is built using the Pyomo package. A solver must be specified to run the model. This is controlled via the <cite>solver</cite> parameter in the <cite>_config.yaml</cite> file and handled within the <cite>model_run</cite> function in the <cite>model.py</cite> module, where solver-specific options can also be configured.</p>
+<p>Two solvers are preconfigured by default:</p>
+<ul class="simple">
+<li><p><strong>HiGHS</strong>
+An open-source solver included via the <cite>highspy</cite> package in the environment. No additional setup is required.</p></li>
+<li><p><strong>Gurobi</strong>
+A commercial solver that can be used free of charge for academic purposes with an academic license. It must be installed separately and properly licensed.</p></li>
+</ul>
+<p>&gt; While HiGHS works reliably for most scenarios, Gurobi is typically much faster, especially for larger or more complex optimization problems.</p>
+</section>
+<section id="optimization-model-formulation">
+<h2>Optimization Model Formulation<a class="headerlink" href="#optimization-model-formulation" title="Link to this heading"></a></h2>
+<p>The optimisation model (model module) used to finde the best configuration is described here.</p>
+<section id="sets">
+<h3>Sets<a class="headerlink" href="#sets" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Model sets</span><a class="headerlink" href="#id5" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Meaning</strong></p></th>
+<th class="head"><p><strong>Symbol</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>n</p></td>
+<td><p>Heat nodes</p></td>
+<td><p><span class="math notranslate nohighlight">\(n\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>h</p></td>
+<td><p>(hourly) Time index</p></td>
+<td><p><span class="math notranslate nohighlight">\(h\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>pc</p></td>
+<td><p>Pipe candidate connections</p></td>
+<td><p><span class="math notranslate nohighlight">\(pc\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>hg</p></td>
+<td><p>Heat generation units</p></td>
+<td><p><span class="math notranslate nohighlight">\(hg\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>hgn</p></td>
+<td><p>Assignment of heat generation units to heat nodes</p></td>
+<td><p><span class="math notranslate nohighlight">\(hgn(hg,n)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>tes</p></td>
+<td><p>Thermal energy storage units</p></td>
+<td><p><span class="math notranslate nohighlight">\(tes \in hg\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>hb</p></td>
+<td><p>Heat boilers</p></td>
+<td><p><span class="math notranslate nohighlight">\(hb \in hg\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>wh</p></td>
+<td><p>Waste heat unit</p></td>
+<td><p><span class="math notranslate nohighlight">\(wh \in hg\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<p>These parameters are initialied based on the input data give in the scenario.</p>
+<table class="docutils align-default" id="id6">
+<caption><span class="caption-text">Model parameters</span><a class="headerlink" href="#id6" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Meaning</strong></p></th>
+<th class="head"><p><strong>Symbol</strong></p></th>
+<th class="head"><p><strong>Units</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>pCostHNS</p></td>
+<td><p>Cost of heat not supplied</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{HNS}}\)</span></p></td>
+<td><p>€/kWh</p></td>
+</tr>
+<tr class="row-odd"><td><p>pCostPumping</p></td>
+<td><p>Pumping cost</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{pump}}\)</span></p></td>
+<td><p>€/m³</p></td>
+</tr>
+<tr class="row-even"><td><p>pTsupply</p></td>
+<td><p>Supply temperature</p></td>
+<td><p><span class="math notranslate nohighlight">\(T^{\text{sup}}\)</span></p></td>
+<td><p>°C</p></td>
+</tr>
+<tr class="row-odd"><td><p>pTreturn</p></td>
+<td><p>Return temperature</p></td>
+<td><p><span class="math notranslate nohighlight">\(T^{\text{ret}}\)</span></p></td>
+<td><p>°C</p></td>
+</tr>
+<tr class="row-even"><td><p>pPipeCostIni</p></td>
+<td><p>Initial pipe cost</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{pipe}}_0\)</span></p></td>
+<td><p>€</p></td>
+</tr>
+<tr class="row-odd"><td><p>pPipeCostSlope</p></td>
+<td><p>Pipe cost slope</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{pipe}}_\text{slope}\)</span></p></td>
+<td><p>€/m m³/h</p></td>
+</tr>
+<tr class="row-even"><td><p>pMassFlowIni</p></td>
+<td><p>Initial mass flow</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\text{ini}}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-odd"><td><p>pAllowDoubleHeating</p></td>
+<td><p>Allow double heating</p></td>
+<td><p><span class="math notranslate nohighlight">\(\delta^{\text{DoubH}}\)</span></p></td>
+<td><p>0/1</p></td>
+</tr>
+<tr class="row-even"><td><p>pTESlosses</p></td>
+<td><p>Thermal energy storage losses</p></td>
+<td><p><span class="math notranslate nohighlight">\(\eta^{\text{loss}}_{\text{TES}}\)</span></p></td>
+<td><ul class="simple">
+<li></li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>pCWater</p></td>
+<td><p>Specific heat capacity of water</p></td>
+<td><p><span class="math notranslate nohighlight">\(c_p^{\text{water}}\)</span></p></td>
+<td><p>kWh/(kg·K)</p></td>
+</tr>
+<tr class="row-even"><td><p>pHeatDemand</p></td>
+<td><p>Heat demand per heat node and hour</p></td>
+<td><p><span class="math notranslate nohighlight">\(D_{n,h}\)</span></p></td>
+<td><p>kWh</p></td>
+</tr>
+<tr class="row-odd"><td><p>pCostDHConnect</p></td>
+<td><p>Cost of DH connection per node</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{DH}}_n\)</span></p></td>
+<td><p>€</p></td>
+</tr>
+<tr class="row-even"><td><p>pMaxDHPower</p></td>
+<td><p>Max district heating power per node</p></td>
+<td><p><span class="math notranslate nohighlight">\(P^{\max}_{n}\)</span></p></td>
+<td><p>kW</p></td>
+</tr>
+<tr class="row-odd"><td><p>pCostLocalHeatProd</p></td>
+<td><p>Cost of local heat production</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{local}}_n\)</span></p></td>
+<td><p>€/kWh</p></td>
+</tr>
+<tr class="row-even"><td><p>pPipeLength</p></td>
+<td><p>Length of pipe connection</p></td>
+<td><p><span class="math notranslate nohighlight">\(L_{n,m}\)</span></p></td>
+<td><p>m</p></td>
+</tr>
+<tr class="row-odd"><td><p>pMaxWHMF</p></td>
+<td><p>Max waste heat mass flow</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\max}_{hg,t}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-even"><td><p>pCostCentrHeatProd</p></td>
+<td><p>Cost of central heat production</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{centr}}_{hg}\)</span></p></td>
+<td><p>€/kWh</p></td>
+</tr>
+<tr class="row-odd"><td><p>pCostCentralHeatProdInv</p></td>
+<td><p>Invest. cost for central heat production</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{centr,inv}}_{hg}\)</span></p></td>
+<td><p>€/kW</p></td>
+</tr>
+<tr class="row-even"><td><p>pCostTESInv</p></td>
+<td><p>Investment cost for TES</p></td>
+<td><p><span class="math notranslate nohighlight">\(C^{\text{TES,inv}}_{tes}\)</span></p></td>
+<td><p>€/kWh</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="variables">
+<h3>Variables<a class="headerlink" href="#variables" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id7">
+<caption><span class="caption-text">Model variables</span><a class="headerlink" href="#id7" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Name</strong></p></th>
+<th class="head"><p><strong>Meaning</strong></p></th>
+<th class="head"><p><strong>Symbol</strong></p></th>
+<th class="head"><p><strong>Units</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>vMF</p></td>
+<td><p>Mass flow in pipes</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}_{n,m,h}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-odd"><td><p>vHNS</p></td>
+<td><p>Non supplied heat to thermal nodes</p></td>
+<td><p><span class="math notranslate nohighlight">\(q^\text{HNS}_{n,h}\)</span></p></td>
+<td><p>kWh</p></td>
+</tr>
+<tr class="row-even"><td><p>vLocalHeatProd</p></td>
+<td><p>Locally produced heat</p></td>
+<td><p><span class="math notranslate nohighlight">\(q^{\text{local}}_{n,h}\)</span></p></td>
+<td><p>kWh</p></td>
+</tr>
+<tr class="row-odd"><td><p>vMFConsumption</p></td>
+<td><p>Mass flow consumed at node</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\text{cons}}_{n,h}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-even"><td><p>vMFInjection</p></td>
+<td><p>Mass flow injected at node</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\text{inj}}_{n,h}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-odd"><td><p>vCentralHeatProd</p></td>
+<td><p>Central heat production</p></td>
+<td><p><span class="math notranslate nohighlight">\(q^{\text{centr}}_{hg,h}\)</span></p></td>
+<td><p>kWh</p></td>
+</tr>
+<tr class="row-even"><td><p>vCentralHeatProdInv</p></td>
+<td><p>Investment in central heat production</p></td>
+<td><p><span class="math notranslate nohighlight">\(x^{\text{centr}}_{hg}\)</span></p></td>
+<td><p>kW</p></td>
+</tr>
+<tr class="row-odd"><td><p>vTESLevel</p></td>
+<td><p>TES level</p></td>
+<td><p><span class="math notranslate nohighlight">\(e_{tes,h}\)</span></p></td>
+<td><p>m³</p></td>
+</tr>
+<tr class="row-even"><td><p>vTESCharge</p></td>
+<td><p>TES charging</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\text{ch}}_{tes,h}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-odd"><td><p>vTESDischarge</p></td>
+<td><p>TES discharging</p></td>
+<td><p><span class="math notranslate nohighlight">\(\dot{m}^{\text{dch}}_{tes,h}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-even"><td><p>vTESCapacitivInv</p></td>
+<td><p>Investment in TES capacity</p></td>
+<td><p><span class="math notranslate nohighlight">\(x^{\text{TES}}_{tes}\)</span></p></td>
+<td><p>m³</p></td>
+</tr>
+<tr class="row-odd"><td><p>vPipeMassFlowInv</p></td>
+<td><p>Investment in pipe mass flow capacity</p></td>
+<td><p><span class="math notranslate nohighlight">\(x^{\text{pipe}}_{n,m}\)</span></p></td>
+<td><p>m³/h</p></td>
+</tr>
+<tr class="row-even"><td><p>vDHconnect</p></td>
+<td><p>Investment in district heat connection</p></td>
+<td><p><span class="math notranslate nohighlight">\(z^{\text{DH}}_n\)</span></p></td>
+<td><p>binary</p></td>
+</tr>
+<tr class="row-odd"><td><p>vBinBuildPipe</p></td>
+<td><p>Build pipe decision</p></td>
+<td><p><span class="math notranslate nohighlight">\(z^{\text{pipe}}_{n,m}\)</span></p></td>
+<td><p>binary</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="objective-function">
+<h3>Objective Function<a class="headerlink" href="#objective-function" title="Link to this heading"></a></h3>
+<p><strong>Hourly Cost Expression</strong></p>
+<p>The hourly costs function hOF:sub:<cite>h</cite> is used to sum up all hourly contributions to the total costs, i.e. operational costs.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{hOF}_h =
+\sum_{n} C^{\text{HNS}} \cdot q^\text{HNS}_{n,h} +
+\sum_{n} C^{\text{local}}_n \cdot q^{\text{local}}_{n,h} +
+\sum_{hg} C^{\text{centr}}_{hg} \cdot q^{\text{centr}}_{hg,h} + \\
+\sum_{(n,m) \in pc} C^{\text{pump}} \cdot L_{n,m} \cdot \dot{m}_{n,m,h}
+\quad \forall h\end{split}\]</div>
+<p><strong>Total Cost Objective</strong></p>
+<p>The objective of the optimisation model is to minimize all operational and investment costs.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\min \left(
+\sum_{n} C^{\text{DH}}_n \cdot z^{\text{DH}}_n +
+\sum_{hg} C^{\text{centr,inv}}_{hg} \cdot x^{\text{centr}}_{hg} +
+\sum_{tes} C^{\text{TES,inv}}_{tes} \cdot x^{\text{TES}}_{tes} + \right. \\
+\left.
+\sum_{(n,m) \in pc} C^{\text{pipe}}_0 \cdot L_{n,m} \cdot z^{\text{pipe}}_{n,m} +
+\sum_{(n,m) \in pc} C^{\text{pipe}}_\text{slope} \cdot L_{n,m} \cdot x^{\text{pipe}}_{n,m} +
+\sum_{h} \text{hOF}_h
+\right)\end{split}\]</div>
+</section>
+<section id="constraints">
+<h3>Constraints<a class="headerlink" href="#constraints" title="Link to this heading"></a></h3>
+<p><strong>Energy Balance</strong></p>
+<p>The energy balance for every hour ensures that the demand minus local heating has to be supplied by a mass flow consumption from the network.</p>
+<div class="math notranslate nohighlight">
+\[\dot{m}^{\text{cons}}_{n,h} =
+\frac{D_{n,h} - q^{\text{local}}_{n,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
+\quad \forall n,h\]</div>
+<p><strong>Max District Heating Power</strong></p>
+<p>A consumption from the district heating network is only possible when the connection is established.</p>
+<div class="math notranslate nohighlight">
+\[\dot{m}^{\text{cons}}_{n,h} \leq
+z^{\text{DH}}_n \cdot \frac{P^{\max}_n}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
+\quad \forall n,h\]</div>
+<p><strong>Mass Flow Balance</strong></p>
+<p>The total mass flow in every node must be conserved.</p>
+<div class="math notranslate nohighlight">
+\[\dot{m}^{\text{cons}}_{n,h} +
+\sum_{hgn(tes,n)} \dot{m}^{\text{ch}}_{tes,h}
+- \dot{m}^{\text{inj}}_{n,h} =
+\sum_{(m,n) \in pc} \dot{m}_{m,n,h} -
+\sum_{(n,m) \in pc} \dot{m}_{n,m,h}
+\quad \forall n,h\]</div>
+<p><strong>Mass Flow Injection</strong></p>
+<p>The mass flow injection to the network equals the sum of all generation unit mass flows at this node.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\dot{m}^{\text{inj}}_{n,h} =
+\sum_{hgn(wh,n)} \frac{q^{\text{centr}}_{wh,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}} +
+\sum_{hgn(hb,n)} \frac{q^{\text{centr}}_{hb,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}} + \\
+\sum_{hgn(tes,n)} \frac{q^{\text{centr}}_{tes,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
+\quad \forall n,h\end{split}\]</div>
+<p><strong>Local Production Exclusion (No Double Heating)</strong></p>
+<p>If no double heating is allowed ($delta^{DoubH} = 0$) all nodes which are connected to the district heating network cannot provide local heating anymore.</p>
+<div class="math notranslate nohighlight">
+\[q^{\text{local}}_{n,h} \leq
+(1 - z^{\text{DH}}_n) \cdot P^{\max}_n
+\quad \text{if } \delta^{DoubH} = 0
+\quad \forall n,h\]</div>
+<p><strong>Max Waste Heat Power</strong></p>
+<p>The available waste heat mass flow in every time step limits the heat power output for waste heat units.</p>
+<div class="math notranslate nohighlight">
+\[q^{\text{centr}}_{wh,h} \leq
+\dot{m}^{\max}_{wh,h} \cdot (T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}
+\quad \forall wh,h\]</div>
+<p><strong>TES Discharge Conversion</strong></p>
+<p>Defines the heat power output of TES from the mass flow.</p>
+<div class="math notranslate nohighlight">
+\[q^{\text{centr}}_{tes,h} =
+\dot{m}^{\text{dch}}_{tes,h} \cdot (T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}
+\quad \forall tes,h\]</div>
+<p><strong>Max Heat Generation by Investment</strong></p>
+<p>Limits the heat generation of all heat generation units to the installed capacity by investments.</p>
+<div class="math notranslate nohighlight">
+\[q^{\text{centr}}_{hg,h} \leq x^{\text{centr}}_{hg}
+\quad \forall hg,h\]</div>
+<p><strong>TES Capacity by Investment</strong></p>
+<p>Limits the storage level of the TES to the invested storage size.</p>
+<div class="math notranslate nohighlight">
+\[e_{tes,h} \leq x^{\text{TES}}_{tes}
+\quad \forall tes,h\]</div>
+<p><strong>TES Energy Balance</strong></p>
+<p>Time-linking storage level constraint.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}e_{tes,h} =
+\begin{cases}
+e_{tes,|H|} + \dot{m}^{\text{ch}}_{tes,h} - \dot{m}^{\text{dch}}_{tes,h}, &amp; \text{if } h = 1 \\
+e_{tes,h-1} \cdot (1 - \eta^{\text{loss}}_{\text{TES}}) + \dot{m}^{\text{ch}}_{tes,h} - \dot{m}^{\text{dch}}_{tes,h}, &amp; \text{otherwise}
+\end{cases}
+\quad \forall tes,h\end{split}\]</div>
+<p><strong>Max Pipe Mass Flow</strong></p>
+<p>Limits the mass flow through the pipes to the investments into pipes (initial investment for the smallest pipe diameter plus continuous investment for higher mass flow).</p>
+<div class="math notranslate nohighlight">
+\[\dot{m}_{n,m,h} \leq z^{\text{pipe}}_{n,m} \cdot \dot{m}^{\text{ini}} + x^{\text{pipe}}_{n,m}
+\quad \forall n,m \in pc, \forall h\]</div>
+<p><strong>Logical Pipe Mass Flow Constraint</strong></p>
+<p>Restricts the increased mass flow investment (for larger diameters) to pipes where the initial investment was made.</p>
+<div class="math notranslate nohighlight">
+\[x^{\text{pipe}}_{n,m} \leq z^{\text{pipe}}_{n,m} \cdot M\]</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="quickstart.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="runcasestudy.html" class="btn btn-neutral float-right" title="Run a Case Study" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

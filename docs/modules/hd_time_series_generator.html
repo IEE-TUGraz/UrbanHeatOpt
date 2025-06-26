@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hd_time_series_generator module &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=40be6288"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="clustering module" href="clustering.html" />
+    <link rel="prev" title="prepare_geodata module" href="prepare_geodata.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Modules</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="prepare_geodata.html">prepare_geodata module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">hd_time_series_generator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.assign_temp"><code class="docutils literal notranslate"><span class="pre">assign_temp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.calc_WD_WE_sequence"><code class="docutils literal notranslate"><span class="pre">calc_WD_WE_sequence()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.calc_yearly_occupancy"><code class="docutils literal notranslate"><span class="pre">calc_yearly_occupancy()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.check_yearly_demand_deviation"><code class="docutils literal notranslate"><span class="pre">check_yearly_demand_deviation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.convert_buildings_to_dwellings"><code class="docutils literal notranslate"><span class="pre">convert_buildings_to_dwellings()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.convert_dwelling_TS_to_building_TS"><code class="docutils literal notranslate"><span class="pre">convert_dwelling_TS_to_building_TS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.fast_TS_generator"><code class="docutils literal notranslate"><span class="pre">fast_TS_generator()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.fast_calculate_hd_ts"><code class="docutils literal notranslate"><span class="pre">fast_calculate_hd_ts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.fast_generate_building_ts"><code class="docutils literal notranslate"><span class="pre">fast_generate_building_ts()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.fast_generate_mcchain"><code class="docutils literal notranslate"><span class="pre">fast_generate_mcchain()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.prepare_temp_out"><code class="docutils literal notranslate"><span class="pre">prepare_temp_out()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hd_time_series_generator.write_hdts_to_disk"><code class="docutils literal notranslate"><span class="pre">write_hdts_to_disk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="clustering.html">clustering module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="visualisation.html">visualisation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html">data module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Modules</a></li>
+      <li class="breadcrumb-item active">hd_time_series_generator module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/hd_time_series_generator.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-hd_time_series_generator">
+<span id="hd-time-series-generator-module"></span><h1>hd_time_series_generator module<a class="headerlink" href="#module-hd_time_series_generator" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.assign_temp">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">assign_temp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar_states</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_setpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">22.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_setback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">18.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#assign_temp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.assign_temp" title="Link to this definition"></a></dt>
+<dd><p>Assigns the setpoint temperature to the states based on the occupancy time series.</p>
+<p>This function takes the occupancy time series and assigns the setpoint temperature to the states. The setpoint temperature is assigned to the states where the occupancy is 1 (occupied) and the setback temperature is assigned to the states where the occupancy is 0 (unoccupied).
+The function returns the states with the assigned temperatures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ar_states</strong> (<em>np.ndarray</em>) -- A numpy array with the occupancy time series for one year in hourly resolution.</p></li>
+<li><p><strong>T_setpoint</strong> (<em>float</em><em>, </em><em>optional</em>) -- Setpoint temperature in °C, defaults to 22.0</p></li>
+<li><p><strong>T_setback</strong> (<em>float</em><em>, </em><em>optional</em>) -- Setback temperature in °C, defaults to 18.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array with the setpoint temperature.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.calc_WD_WE_sequence">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">calc_WD_WE_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_temperature</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#calc_WD_WE_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.calc_WD_WE_sequence" title="Link to this definition"></a></dt>
+<dd><p>Calculates a seqeunce of business days and weekends based on the date of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_temperature</strong> (<em>pd.DataFrame</em>) -- pandas dataframe with the temperature data and the date</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy array with the sequence of business days and weekends</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.calc_yearly_occupancy">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">calc_yearly_occupancy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar_WDWE</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_transition_matrix_WD</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_transition_matrix_WE</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#calc_yearly_occupancy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.calc_yearly_occupancy" title="Link to this definition"></a></dt>
+<dd><p>Calculates the yearly occupancy time series for a given sequence of business days and weekends by Markov Chain Monte Carlo (MCMC) simulation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ar_WDWE</strong> (<em>np.ndarray</em>) -- A numpy array with the sequence of business days and weekends.</p></li>
+<li><p><strong>ar_transition_matrix_WD</strong> (<em>np.ndarray</em>) -- A numpy array with the transition matrix for weekdays.</p></li>
+<li><p><strong>ar_transition_matrix_WE</strong> (<em>np.ndarray</em>) -- A numpy array with the transition matrix for weekends.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array with the yearly occupancy time series in hourly resolution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.check_yearly_demand_deviation">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">check_yearly_demand_deviation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_buildings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_heat_demand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hd_time_series_generator.html#check_yearly_demand_deviation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.check_yearly_demand_deviation" title="Link to this definition"></a></dt>
+<dd><p>Check deviation of the yearly demand of the buildings from the sum of the heating demand time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf_buildings</strong> (<em>gpd.GeoDataFrame</em>) -- geodataframe with the building data</p></li>
+<li><p><strong>df_heat_demand</strong> (<em>pd.DataFrame</em>) -- dataframe with the heating demand time series</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.convert_buildings_to_dwellings">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">convert_buildings_to_dwellings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gdf_buildings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GeoDataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#convert_buildings_to_dwellings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.convert_buildings_to_dwellings" title="Link to this definition"></a></dt>
+<dd><p>Convert the building data to dwelling data and split the data into individual arrays.</p>
+<p>This function takes the building data and splits it into individual arrays for each dwelling. The arrays are then used to generate the heating demand time series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gdf_buildings</strong> (<em>gpd.GeoDataFrame</em>) -- geodataframe with the building data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>individual arrays for the different building properties</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.convert_dwelling_TS_to_building_TS">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">convert_dwelling_TS_to_building_TS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dwelling_HD_TS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_building_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#convert_dwelling_TS_to_building_TS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.convert_dwelling_TS_to_building_TS" title="Link to this definition"></a></dt>
+<dd><p>Sum up the heating demand time series for all dwellings in a building and convert the data to a pandas dataframe.</p>
+<p>This function takes the heating demand time series for all dwellings and sums them up for each building. The resulting data is then converted to a pandas dataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dwelling_HD_TS</strong> (<em>np.ndarray</em>) -- numpy array with the heating demand time series for all dwellings</p></li>
+<li><p><strong>ar_building_id</strong> (<em>np.ndarray</em>) -- numpy array with the building id for each dwelling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas dataframe with the heating demand time series for all buildings</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.fast_TS_generator">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">fast_TS_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case_study_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#fast_TS_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.fast_TS_generator" title="Link to this definition"></a></dt>
+<dd><p>Performs a complete run of the time series generator for a given case study.</p>
+<p>This function loads the necessary data, processes it, and generates time series data for buildings.
+Steps:</p>
+<ol class="arabic simple">
+<li><p>Load the configuration file.</p></li>
+<li><p>Load the transition matrices for weekdays (WD) and weekends (WE).</p></li>
+<li><p>Load and process temperature data.</p></li>
+<li><p>Initialize arrays for internal and solar gains.</p></li>
+<li><p>Load building data as a GeoDataFrame.</p></li>
+<li><p>Convert building data to dwelling-specific arrays.</p></li>
+<li><p>Generate time series for each dwelling using thermal properties and external conditions.</p></li>
+<li><p>Aggregate dwelling-level time series into building-level time series.</p></li>
+<li><p>Save the resulting time series to disk as a CSV file.</p></li>
+</ol>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>case_study_name</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>save_to_disk</strong> (<em>bool</em><em>, </em><em>optional</em>) -- set to true if you want to write the results into a csv. file, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a pandas dataframe with the generated time series data in hourly resolution for all buildings</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.fast_calculate_hd_ts">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">fast_calculate_hd_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar_Tout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_Tset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_internal_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_solar_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_heat_power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">15.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_coductance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_storage_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalor_solar_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalor_internal_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#fast_calculate_hd_ts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.fast_calculate_hd_ts" title="Link to this definition"></a></dt>
+<dd><p>Fast calculation of the heating demand time series for a single dwelling.</p>
+<p>This function gets precompiled to speed up the calculations. All parameters and time series in the input are for a single dwelling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ar_Tout</strong> (<em>np.ndarray</em>) -- A numpy array with the outside temperature for each time step in °C.</p></li>
+<li><p><strong>ar_Tset</strong> (<em>np.ndarray</em>) -- A numpy array with the setpoint temperature for each time step in °C.</p></li>
+<li><p><strong>ar_internal_gain</strong> (<em>np.ndarray</em>) -- A numpy array with the internal gain for each time step in kW.</p></li>
+<li><p><strong>ar_solar_gain</strong> (<em>np.ndarray</em>) -- A numpy array with the solar gain for each time step in kW.</p></li>
+<li><p><strong>max_heat_power</strong> (<em>float</em><em>, </em><em>optional</em>) -- Maximum heating power for that dwelling in kW, defaults to 15.0</p></li>
+<li><p><strong>thermal_coductance</strong> (<em>float</em><em>, </em><em>optional</em>) -- generalised thermal conductance in kW/K for the specific dwelling, defaults to 0.12</p></li>
+<li><p><strong>thermal_storage_capacity</strong> (<em>float</em><em>, </em><em>optional</em>) -- generalised thermal storage capacity in kWh/K for the specific dwelling, defaults to 7.0</p></li>
+<li><p><strong>scalor_solar_gain</strong> (<em>float</em><em>, </em><em>optional</em>) -- Scaling factor for the solar gain of the specific dwelling, defaults to 0.0</p></li>
+<li><p><strong>scalor_internal_gain</strong> (<em>float</em><em>, </em><em>optional</em>) -- Scaling factor for the internal gain for the specific dwelling, defaults to 0.0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>returns the heating demand time series and the indoor temperature time series for the dwelling</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.fast_generate_building_ts">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">fast_generate_building_ts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar_building_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_GeneralisedThermCond</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_GeneralisedThermCap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_MaxDemand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_temp_setpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_temp_setback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_Tout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_WDWE</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_transition_matrix_WD</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_transition_matrix_WE</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ar_solar_gain_profile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalor_solar_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalor_internal_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#fast_generate_building_ts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.fast_generate_building_ts" title="Link to this definition"></a></dt>
+<dd><p>This function generates the heating demand time series for all dwellings.</p>
+<p>This function provides a fast implementation of the heating demand time series generator. It uses vectorized operations to speed up the calculations.
+All input data has to be provided as numpy arrays. The function returns a numpy array with the heating demand time series for all dwellings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ar_building_id</strong> (<em>np.ndarray</em>) -- A numpy array with the corresponding building id for each dwelling.</p></li>
+<li><p><strong>ar_GeneralisedThermCond</strong> (<em>np.ndarray</em>) -- A numpy array with the generalised thermal conductance for each dwelling.</p></li>
+<li><p><strong>ar_GeneralisedThermCap</strong> (<em>np.ndarray</em>) -- A numpy array with the generalised thermal capacity for each dwelling.</p></li>
+<li><p><strong>ar_MaxDemand</strong> (<em>np.ndarray</em>) -- A numpy array with the maximum heating demand for each dwelling.</p></li>
+<li><p><strong>ar_temp_setpoint</strong> (<em>np.ndarray</em>) -- A numpy array with the setpoint temperature for each dwelling.</p></li>
+<li><p><strong>ar_temp_setback</strong> (<em>np.ndarray</em>) -- A numpy array with the setback temperature for each dwelling.</p></li>
+<li><p><strong>ar_Tout</strong> (<em>np.ndarray</em>) -- A numpy array with the outside temperature for each time step.</p></li>
+<li><p><strong>ar_WDWE</strong> (<em>np.ndarray</em>) -- A numpy array with the sequence of business days and weekends.</p></li>
+<li><p><strong>ar_transition_matrix_WD</strong> (<em>np.ndarray</em>) -- A numpy array with the transition matrix for weekdays.</p></li>
+<li><p><strong>ar_transition_matrix_WE</strong> (<em>np.ndarray</em>) -- A numpy array with the transition matrix for weekends.</p></li>
+<li><p><strong>ar_solar_gain_profile</strong> (<em>np.ndarray</em>) -- A numpy array with the general solar gain (= solar irradiation) for each time step.</p></li>
+<li><p><strong>scalor_solar_gain</strong> (<em>np.ndarray</em>) -- A numpy array with the scaling factor for the solar gain for each dwelling.</p></li>
+<li><p><strong>scalor_internal_gain</strong> (<em>np.ndarray</em>) -- A numpy array with the scaling factor for the internal gain for each dwelling.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A numpy array with the heating demand time series for all dwellings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.fast_generate_mcchain">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">fast_generate_mcchain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ar_transition_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ini_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#fast_generate_mcchain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.fast_generate_mcchain" title="Link to this definition"></a></dt>
+<dd><p>Generates a Markov Chain Monte Carlo (MCMC) chain based on the transition matrix for one day.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ar_transition_matrix</strong> (<em>np.ndarray</em>) -- A numpy array with the transition matrix for one day.</p></li>
+<li><p><strong>ini_prob</strong> (<em>float</em><em>, </em><em>optional</em>) -- probability for active for the first time step, defaults to 0.2</p></li>
+<li><p><strong>resample</strong> (<em>bool</em><em>, </em><em>optional</em>) -- boole flag: if True the 10-min profile is converted to hourly resolution, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a numpy array with the MCMC chain in hourly (or 10-min) resolution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.prepare_temp_out">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">prepare_temp_out</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="../_modules/hd_time_series_generator.html#prepare_temp_out"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.prepare_temp_out" title="Link to this definition"></a></dt>
+<dd><p>Prepare the outside temperature data for the simulation.</p>
+<p>Based on the datetime index, the function adds a column to indicate whether the day is a business day or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario</strong> (<em>str</em>) -- _description_</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas dataframe with the outside temperature</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="hd_time_series_generator.write_hdts_to_disk">
+<span class="sig-prename descclassname"><span class="pre">hd_time_series_generator.</span></span><span class="sig-name descname"><span class="pre">write_hdts_to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_heating</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">casestudy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hd_time_series_generator.html#write_hdts_to_disk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#hd_time_series_generator.write_hdts_to_disk" title="Link to this definition"></a></dt>
+<dd><p>Write the heating demand time series to disk.</p>
+<p>This function checks if the directory exists and creates it if not. Then it saves the heating demand time series to a CSV file.
+For large datasets, this can take a while. Cosider other data formats if this becomes a problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_heating</strong> (<em>pd.DataFrame</em>) -- pandas dataframe with the heating demand for buildings</p></li>
+<li><p><strong>casestudy</strong> (<em>str</em>) -- name of the case study</p></li>
+<li><p><strong>config</strong> (<em>dict</em>) -- configuration dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="prepare_geodata.html" class="btn btn-neutral float-left" title="prepare_geodata module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="clustering.html" class="btn btn-neutral float-right" title="clustering module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

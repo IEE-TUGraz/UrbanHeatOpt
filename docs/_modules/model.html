@@ -1,0 +1,980 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>model &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=40be6288"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># import libraries to work with Pyomo models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">data</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyomo.environ</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyomo.opt</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverFactory</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">utils</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">colored</span><span class="p">,</span> <span class="n">cprint</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+
+<div class="viewcode-block" id="HeatNetworkModel">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HeatNetworkModel</span><span class="p">(</span><span class="n">ConcreteModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to represent the core model of the heat network optimization problem. It inherits from ConcreteModel.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">logger</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor method for the HeatNetworkModel class. It calls the parent class&#39;s constructor and</span>
+<span class="sd">        initializes the model&#39;s data structures.</span>
+
+<span class="sd">        :param scenario_name: name of the scenario, used for the model name and logging</span>
+<span class="sd">        :type scenario_name: str</span>
+<span class="sd">        :param logger: optional logger to log the model&#39;s solution process. If not provided, logging is disabled.</span>
+<span class="sd">        :type logger: _type_, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">scenario_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logging</span> <span class="o">=</span> <span class="kc">True</span>
+    
+    
+<div class="viewcode-block" id="HeatNetworkModel.fill_model_data">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.fill_model_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_model_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dict</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the model data from the input dictionary and set up the model sets and parameters in Pyomo.</span>
+
+<span class="sd">        :param input_dict: input data from disk</span>
+<span class="sd">        :type input_dict: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df_heat_demand</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_demand&#39;</span><span class="p">]</span>
+        <span class="n">df_heat_gen_units</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span>
+        <span class="n">df_heat_network</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_network&#39;</span><span class="p">]</span>
+        <span class="n">df_heat_nodes</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span>
+        <span class="n">dict_parameter_cost</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;parameter_cost&#39;</span><span class="p">]</span>
+
+        <span class="n">df_waste_heat_prof</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df_waste_heat_prof</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span>
+            <span class="c1"># check that the waste heat has an associated heat generation unit</span>
+            <span class="k">for</span> <span class="n">wh</span> <span class="ow">in</span> <span class="n">df_waste_heat_prof</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="k">if</span> <span class="n">wh</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waste heat profile </span><span class="si">{</span><span class="n">wh</span><span class="si">}</span><span class="s2"> has no associated heat generation unit&quot;</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Waste heat profile </span><span class="si">{</span><span class="n">wh</span><span class="si">}</span><span class="s2"> has no associated heat generation unit&quot;</span>
+
+        <span class="n">hours</span> <span class="o">=</span> <span class="n">df_heat_demand</span><span class="o">.</span><span class="n">hour</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">hn</span> <span class="o">=</span> <span class="n">df_heat_nodes</span><span class="o">.</span><span class="n">node</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;######################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start: fill model data&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;######################&quot;</span><span class="p">)</span>
+        
+        <span class="c1"># Define sets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="n">hn</span> <span class="c1"># Thermal nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="o">=</span> <span class="n">hours</span> <span class="c1"># Hourly index</span>
+
+        <span class="c1"># General parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostHNS</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pCostHNS&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostPumping</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pCostPumping&#39;</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pTsupply&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pTreturn</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pTreturn&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pPipeCostIni</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pPipeCostIni&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pPipeCostSlope</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pPipeCostsSlope&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pMassFlowIni</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;pMassFlowIni&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pAllowDoubleHeating</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">dict_parameter_cost</span><span class="p">[</span><span class="s1">&#39;allow_double_heating&#39;</span><span class="p">])</span>
+
+
+        <span class="c1"># will be replaced by a parameter of heat gen units later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pTESlosses</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        
+        <span class="c1"># Physical parameters, in kWh/(m³*K) water at standard conditions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCWater</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="mf">1.16389</span><span class="p">)</span>
+
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># dictionary to create the heat network</span>
+        <span class="n">dict_heat_network</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_heat_network</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">dict_heat_network</span><span class="p">[(</span><span class="n">row</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> 
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created heat network dictionary - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: create heat network dictionary&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># use the network dictionary  to create the connections index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="p">[(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span> <span class="ow">in</span> <span class="n">dict_heat_network</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span> <span class="c1"># Pipe candidate connections</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hg</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>  <span class="c1"># Heat generation units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hgn</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">initialize</span><span class="o">=</span><span class="p">[(</span><span class="n">row</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">heat_unit_id</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()])</span>  <span class="c1"># Assignment of heat gen units to nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tes</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">within</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">isTES</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>  <span class="c1"># Thermal energy storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hb</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">within</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">isBoiler</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>  <span class="c1"># Heat boilers</span>
+
+        <span class="k">if</span> <span class="n">df_waste_heat_prof</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wh</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">within</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">df_waste_heat_prof</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># Waste heat generation units</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wh</span> <span class="o">=</span> <span class="n">Set</span><span class="p">(</span><span class="n">within</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">)</span>  <span class="c1"># Waste heat generation units</span>
+
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created heat network dictionary - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add parameters&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># add the heat demand data to the model</span>
+        <span class="n">dict_cost_dh_connect</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_heat_demand</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_max_dh_power</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_local_heat_prod_cost</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">:</span>
+            <span class="c1"># create connection cost</span>
+            <span class="n">dict_cost_dh_connect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_nodes</span><span class="p">[</span><span class="n">df_heat_nodes</span><span class="o">.</span><span class="n">node</span> <span class="o">==</span> <span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">CostsDHconnect</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># create max dh power</span>
+            <span class="n">dict_max_dh_power</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_nodes</span><span class="p">[</span><span class="n">df_heat_nodes</span><span class="o">.</span><span class="n">node</span> <span class="o">==</span> <span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">maxDHPower</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># create local heat production cost</span>
+            <span class="n">dict_local_heat_prod_cost</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_nodes</span><span class="p">[</span><span class="n">df_heat_nodes</span><span class="o">.</span><span class="n">node</span> <span class="o">==</span> <span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">LocalHeatProdCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">aux_df</span> <span class="o">=</span> <span class="n">df_heat_demand</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">]]</span>
+
+            <span class="c1"># this could be improved to use itertuples, but it is not a bottleneck right now</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">aux_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">dict_heat_demand</span><span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">]))]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created heat demand dictionary - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: created heat demand dictionary&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pHeatDemand</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_heat_demand</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostDHConnect</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_cost_dh_connect</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pMaxDHPower</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_max_dh_power</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostLocalHeatProd</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_local_heat_prod_cost</span><span class="p">,</span><span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pPipeLength</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_heat_network</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added heat demand data - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add heat demand data&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+
+        <span class="n">dict_waste_heat_prof</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_cost_central_heat_prod</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_cost_central_heat_prod_inv</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">dict_cost_tes_inv</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">OMVarCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">dict_cost_central_heat_prod</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">OMVarCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">PowerInvCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="n">dict_cost_central_heat_prod_inv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">PowerInvCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">isTES</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span>
+                    <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">StorageInvCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]))):</span>
+                <span class="n">dict_cost_tes_inv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_heat_gen_units</span><span class="p">[</span><span class="n">df_heat_gen_units</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">StorageInvCost</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">df_waste_heat_prof</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">hg</span> <span class="ow">in</span> <span class="n">df_waste_heat_prof</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df_waste_heat_prof</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                        <span class="n">dict_waste_heat_prof</span><span class="p">[(</span><span class="n">hg</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">])]</span>  <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created heat generation dictionaries - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add heat generation dictionaries&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pMaxWHMF</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_waste_heat_prof</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostCentrHeatProd</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_cost_central_heat_prod</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostCentralHeatProdInv</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_cost_central_heat_prod_inv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pCostTESInv</span> <span class="o">=</span> <span class="n">Param</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="n">dict_cost_tes_inv</span><span class="p">,</span> <span class="n">within</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added heat generation data - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add heat generation parameters&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;######################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End: fill model data&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;######################&quot;</span><span class="p">)</span></div>
+
+
+
+    
+<div class="viewcode-block" id="HeatNetworkModel.initialize_variables">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.initialize_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the variables of the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;###########################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start: initialize variables&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;###########################&quot;</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c1"># Continuous variables</span>
+        <span class="c1">#self.vTotalVCost = Var(domain=NonNegativeReals)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vMF</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vHNS</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vLocalHeatProd</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vMFConsumption</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vMFInjection</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProd</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vTESLevel</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vTESCharge</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vTESDischarge</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vTESCapacitivInv</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">NonNegativeReals</span><span class="p">)</span>
+
+        <span class="c1"># Binary variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vDHconnect</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">Binary</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vBinBuildPipe</span> <span class="o">=</span> <span class="n">Var</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">Binary</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added variables - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add variables&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;###########################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End: initialize variables&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;###########################&quot;</span><span class="p">)</span></div>
+
+
+    
+<div class="viewcode-block" id="HeatNetworkModel.initialize_constraints">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.initialize_constraints">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initialize_constraints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the constraints of the model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start: initialize constraints&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">hourly_cost_function</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostHNS</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vHNS</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostCentrHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hg</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostPumping</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pc</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">hourly_cost</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">hourly_cost_function</span><span class="p">)</span>
+
+        <span class="c1"># Objective function</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">objective_function</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostDHConnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hg</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pCostTESInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESCapacitivInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span> <span class="k">for</span> <span class="n">tes</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tes</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pPipeCostIni</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pPipeCostSlope</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">)</span> <span class="o">+</span>  <span class="c1"># tbd add variable slope price</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">hourly_cost</span><span class="p">[</span><span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">h</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">Objective</span><span class="p">(</span><span class="n">rule</span><span class="o">=</span><span class="n">objective_function</span><span class="p">,</span> <span class="n">sense</span><span class="o">=</span><span class="n">minimize</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added objective function - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add objective function&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Energy balance in kW for ever heat node and hour</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">energy_balance_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMFConsumption</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pHeatDemand</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">])</span> <span class="o">/</span> <span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_balance</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">energy_balance_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added energy balance - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add energy balance&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Limits use of distrct heating only to connected nodes and to a maximum power (as a specific bigM)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">max_dh_power_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMFConsumption</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pMaxDHPower</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">/</span> <span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_dh_power</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">max_dh_power_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added max. district heating consumption - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add max dh power&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Mass flow balacne between all nodes</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">mf_balance_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="n">aux_pc_out</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pc</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span>
+            <span class="n">aux_pc_inf</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">pc</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMFConsumption</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vTESCharge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">tes</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tes</span> <span class="k">if</span> <span class="p">(</span><span class="n">tes</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hgn</span><span class="p">)</span> <span class="o">-</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMFInjection</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span>
+                <span class="c1"># sum(model.vMF[m, n, h] for m in model.n if (m, n) in aux_pc) -</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">aux_pc_inf</span><span class="p">)</span> <span class="o">-</span>
+                <span class="c1"># sum(model.vMF[n, m, h] for m in model.n if (n, m) in aux_pc)</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">aux_pc_out</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mf_balance</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">mf_balance_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added mass flow balance system - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add mf balance&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Mass flow injection into the network</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">mf_injection_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMFInjection</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">h</span><span class="p">]</span> <span class="o">==</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">wh</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">wh</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">wh</span> <span class="k">if</span> <span class="p">(</span><span class="n">wh</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hgn</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hb</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">hb</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hb</span> <span class="k">if</span> <span class="p">(</span><span class="n">hb</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hgn</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span><span class="p">)</span> <span class="o">+</span>
+                <span class="nb">sum</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="k">for</span> <span class="n">tes</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">tes</span> <span class="k">if</span> <span class="p">(</span><span class="n">tes</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">hgn</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mf_injection</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">mf_injection_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added mass flow balance node - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add mf injection&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pAllowDoubleHeating</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="c1"># Exclude decentral heating for nodes that are connected to the network</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">decentral_condition_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pMaxDHPower</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decentral_condition</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">decentral_condition_rule</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added local heating - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Info: No decentral heating allowed when building connected to the network&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add decentral condition&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Info: Decentral heating allowed when building connected to the network!&#39;</span><span class="p">)</span>
+
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Limit the maximum power of the waste heat generation units</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">max_wh_power_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">wh</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">wh</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">pMaxWHMF</span><span class="p">[</span><span class="n">wh</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_wh_power</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wh</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">max_wh_power_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added max. waste heat - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add max wh power&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># calculate the heat production of the TES</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tes_production_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESDischarge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pTsupply</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTreturn</span><span class="p">)</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pCWater</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tes_production</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">tes_production_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added thermal storage production - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add tes production&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Limit the maximum power to investments</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">max_power_invest_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_power_invest</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">max_power_invest_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added max. power invest - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add max power invest&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Limit the size of the storage to its investments</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tes_storage_invest_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vTESLevel</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span><span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESCapacitivInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tes_storage_invest</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">tes_storage_invest_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added max. thermal storage invest - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add tes storage invest&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Balance equation for the TES</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tes_balance_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">h</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESLevel</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESLevel</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">h</span><span class="p">)]</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESCharge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESDischarge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vTESLevel</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESLevel</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">pTESlosses</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESCharge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">-</span> <span class="n">model</span><span class="o">.</span><span class="n">vTESDischarge</span><span class="p">[</span><span class="n">tes</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tes_balance</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">tes_balance_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added thermal storage balance - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: add tes balance&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># Limit mass flow through the pipes</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">max_mass_flow_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="n">model</span><span class="o">.</span><span class="n">pMassFlowIni</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_mass_flow</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">max_mass_flow_rule</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">logic_mass_flow_rule</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">model</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1e4</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logic_mass_flow</span> <span class="o">=</span> <span class="n">Constraint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="n">logic_mass_flow_rule</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Added mass flow pipe - </span><span class="si">{:.2f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: build max mass flow&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End: initialize constraints&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span></div>
+
+
+        
+<div class="viewcode-block" id="HeatNetworkModel.model_run">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.model_run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">model_run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the model to solve the optimization problem. The solver can be defined here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Start: model solve&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+
+
+        <span class="n">solver</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;solver&#39;</span><span class="p">]</span>
+        <span class="n">mip_gap</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;mip_gap&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">solver</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No solver defined, using default &#39;appsi_highs&#39;&quot;</span><span class="p">)</span>
+            <span class="n">solver</span> <span class="o">=</span> <span class="s1">&#39;appsi_highs&#39;</span>
+
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start: solve model&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s1">&#39;gurobi&#39;</span><span class="p">:</span>
+            <span class="n">solver</span> <span class="o">=</span> <span class="n">SolverFactory</span><span class="p">(</span><span class="s1">&#39;gurobi&#39;</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tee</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;MIPGap&#39;</span><span class="p">:</span> <span class="n">mip_gap</span><span class="p">,</span> <span class="s1">&#39;Threads&#39;</span><span class="p">:</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()})</span>
+        <span class="k">elif</span> <span class="n">solver</span> <span class="o">==</span> <span class="s1">&#39;highs&#39;</span><span class="p">:</span>
+            <span class="n">solver</span> <span class="o">=</span> <span class="n">SolverFactory</span><span class="p">(</span><span class="s1">&#39;appsi_highs&#39;</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tee</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mip_rel_gap&#39;</span><span class="p">:</span> <span class="n">mip_gap</span><span class="p">,</span> <span class="s1">&#39;threads&#39;</span><span class="p">:</span><span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error: Solver not recognized&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: solve model&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logging</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;End: model solve&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;#############################&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="HeatNetworkModel.export_results">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.export_results">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform some ex-post calculations and export the results to csv files.</span>
+
+<span class="sd">        :param case_study_name: name of the case study</span>
+<span class="sd">        :type case_study_name: str</span>
+<span class="sd">        :param model_name: name of the scenario / model</span>
+<span class="sd">        :type model_name: str</span>
+<span class="sd">        :param config: configuration dictionary </span>
+<span class="sd">        :type config: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start: export results&quot;</span><span class="p">)</span>
+        <span class="c1"># convert the DH connection to a dataframe</span>
+        <span class="n">df_dh_connection</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">df_dh_connection</span><span class="p">[</span><span class="s1">&#39;Node&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span>
+        <span class="n">df_dh_connection</span><span class="p">[</span><span class="s1">&#39;DH Connection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">]</span>
+
+        <span class="c1"># convert the pipe connections to a dataframe</span>
+        <span class="n">df_pipe_connections</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">df_pipe_connections</span><span class="p">[</span><span class="s1">&#39;from&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">]</span>
+        <span class="n">df_pipe_connections</span><span class="p">[</span><span class="s1">&#39;to&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">m</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">]</span>
+        <span class="n">df_pipe_connections</span><span class="p">[</span><span class="s1">&#39;Build Pipe&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">]</span>
+        <span class="n">df_pipe_connections</span><span class="p">[</span><span class="s1">&#39;Max Mass Flow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">]</span>
+        <span class="n">df_pipe_connections</span><span class="p">[</span><span class="s1">&#39;Mass Flow Investment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pMassFlowIni</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span><span class="p">]</span>
+
+        <span class="c1"># convert the heat generation time series to a dataframe</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">])</span>
+
+        <span class="n">df_heat_gen</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Generation Unit&#39;</span><span class="p">,</span> <span class="s1">&#39;Hour&#39;</span><span class="p">,</span> <span class="s1">&#39;Heat Production&#39;</span><span class="p">])</span>
+        <span class="n">df_heat_gen</span> <span class="o">=</span> <span class="n">df_heat_gen</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;Generation Unit&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;Hour&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s1">&#39;Heat Production&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">df_heat_gen</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Local Heat Production&#39;</span><span class="p">,</span> <span class="s1">&#39;Generation Unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Dezentral Heat Production&#39;</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">:</span>
+            <span class="n">df_heat_gen</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">&#39;Local Heat Production&#39;</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
+
+     
+        <span class="c1"># write economic results to a dataframe</span>
+        <span class="n">df_economic_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;Costs in k€&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s1">&#39;Total Costs&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;DH Connection Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;HNS Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Local Heat Production Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Central Heat Production Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Central Heat Production Investment Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;TES Investment Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Pumping Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Pipe Base Investment Cost&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Pipe Slope Investment Cost&#39;</span>
+            <span class="p">],</span>
+            <span class="s1">&#39;Value&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostDHConnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vDHconnect</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostHNS</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vHNS</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vHNS</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vLocalHeatProd</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostCentrHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hg</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProd</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hg</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostTESInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vTESCapacitivInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">tes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vTESCapacitivInv</span><span class="p">[</span><span class="n">tes</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pCostPumping</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vMF</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">h</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pPipeCostIni</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vBinBuildPipe</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span>
+                <span class="nb">round</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pPipeCostSlope</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pPipeLength</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vPipeMassFlowInv</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">})</span>
+
+        <span class="c1"># write the investment decisions per technology to a dataframe</span>
+        <span class="n">df_investment_decisions</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Generation Unit&#39;</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Capacity Investments / kW&#39;</span><span class="p">,</span> <span class="s1">&#39;Storage Investments / m3&#39;</span><span class="p">])</span>
+        <span class="c1"># add if the generation unit is a boiler, waste heat or TES</span>
+        <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hg</span><span class="p">):</span>
+            <span class="n">df_investment_decisions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span><span class="s1">&#39;Generation Unit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hg</span>
+            <span class="n">df_investment_decisions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Boiler&#39;</span> <span class="k">if</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hb</span> <span class="k">else</span> <span class="s1">&#39;Waste Heat&#39;</span> <span class="k">if</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">wh</span> <span class="k">else</span> <span class="s1">&#39;TES&#39;</span> <span class="k">if</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tes</span> <span class="k">else</span> <span class="s1">&#39;Central Heat&#39;</span>
+            <span class="n">df_investment_decisions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span><span class="s1">&#39;Capacity Investments / kW&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vCentralHeatProdInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">df_investment_decisions</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">hg</span><span class="p">,</span><span class="s1">&#39;Storage Investments / m3&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vTESCapacitivInv</span><span class="p">[</span><span class="n">hg</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">hg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tes</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="n">output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;expost_dir&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_folder</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span>
+
+
+        <span class="c1"># write the economic results to a csv file</span>
+        <span class="n">df_economic_results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s1">&#39;Economic_Results.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">df_investment_decisions</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="s1">&#39;Investment_Decisions.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="c1"># write the results to a csv file</span>
+        <span class="n">df_dh_connection</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span><span class="s1">&#39;DH_Connection.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">df_pipe_connections</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span><span class="s1">&#39;Pipe_Connections.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">df_heat_gen</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span><span class="s1">&#39;Heat_Generation_TS.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done: export results&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="HeatNetworkModel.export_model_variables">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.export_model_variables">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_model_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        This function exports the variables from a pyomo model to a dictionary of dataframes. Does not depend</span>
+<span class="sd">        on the model&#39;s structure, all the data is extracted from the model&#39;s components</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># a dictionary of dataframes to store all the variables data, includingg their indices and values.</span>
+        <span class="c1"># The keys are the variables&#39; names</span>
+        <span class="n">d_vars</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># get all the variables from the model</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_objects</span><span class="p">(</span><span class="n">Var</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variables</span><span class="p">:</span>
+            <span class="c1"># get the variable&#39;s representation inside the model</span>
+            <span class="n">var_object</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="c1"># create a dictionary to store the variable&#39;s data: its index set and its value</span>
+            <span class="n">aux_d</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">aux_d</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># get the indices of the variable</span>
+            <span class="n">idx_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">var_object</span><span class="o">.</span><span class="n">index_set</span><span class="p">())</span>
+            <span class="n">aux_data</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">get_values</span><span class="p">()</span>
+            <span class="n">aux_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">aux_data</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">aux_data</span><span class="o">.</span><span class="n">values</span><span class="p">())})</span>
+            <span class="c1"># if it is a tuple, the variable has more than one index set</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="c1"># count the number of index sets</span>
+                <span class="n">len_test_elem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">aux_cols_idx</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;index_set_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_test_elem</span><span class="p">)]</span>
+                <span class="n">aux_data_df</span><span class="p">[</span><span class="n">aux_cols_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">aux_data_df</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">aux_data_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">aux_data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># if it is not a tuple, the variable one index set and we can the values directly</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">aux_d</span><span class="p">[</span><span class="s1">&#39;index_set_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">aux_cols_idx</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;index_set_1&#39;</span><span class="p">]</span>
+                <span class="n">aux_data_df</span><span class="p">[</span><span class="n">aux_cols_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">aux_data_df</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">aux_data_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">aux_data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># store the dataframe in the dictionary with all the other variables</span>
+            <span class="n">d_vars</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span> <span class="o">=</span> <span class="n">aux_data_df</span>
+
+        <span class="k">return</span> <span class="n">d_vars</span></div>
+
+
+<div class="viewcode-block" id="HeatNetworkModel.export_model_parameters">
+<a class="viewcode-back" href="../modules/model.html#model.HeatNetworkModel.export_model_parameters">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">export_model_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;This function exports the parameters from a pyomo model to a dictionary of dataframes. Does not depend</span>
+<span class="sd">        on the model&#39;s structure, all the data is extracted from the model&#39;s components.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># a dictionary of dataframes to store all the variables data, including their indices and values.</span>
+        <span class="c1"># The keys are the variables&#39; names</span>
+        <span class="n">d_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># get all the variables from the model</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">component_objects</span><span class="p">(</span><span class="n">Param</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="n">param_object</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="c1"># create a dictionary to store the variable&#39;s data: its index set and its value</span>
+            <span class="n">aux_d</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">aux_d</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># get the indices of the variable</span>
+            <span class="n">idx_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">param_object</span><span class="o">.</span><span class="n">index_set</span><span class="p">())</span>
+            <span class="n">aux_data</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="n">aux_data_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;indices&#39;</span><span class="p">:</span> <span class="n">idx_elements</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">aux_data</span><span class="p">)})</span>
+            <span class="c1"># if it is a tuple, the variable has more than one index set</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="c1"># count the number of index sets</span>
+                <span class="n">len_test_elem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_elements</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">aux_cols_idx</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;index_set_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">len_test_elem</span><span class="p">)]</span>
+                <span class="n">aux_data_df</span><span class="p">[</span><span class="n">aux_cols_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">aux_data_df</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">aux_data_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">aux_data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># if it is not a tuple, the variable one index set and we can the values directly</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">aux_d</span><span class="p">[</span><span class="s1">&#39;index_set_1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">aux_cols_idx</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;index_set_1&#39;</span><span class="p">]</span>
+                <span class="n">aux_data_df</span><span class="p">[</span><span class="n">aux_cols_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">aux_data_df</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">aux_data_df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="n">aux_data_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;indices&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="c1"># store the dataframe in the dictionary with all the other variables</span>
+            <span class="n">d_params</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span> <span class="o">=</span> <span class="n">aux_data_df</span>
+
+        <span class="k">return</span> <span class="n">d_params</span></div>
+</div>
+
+    
+
+<div class="viewcode-block" id="run_model">
+<a class="viewcode-back" href="../modules/model.html#model.run_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_model</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the complete workflow to load data, fill the model, run the optimization and export the results.</span>
+<span class="sd">    This function is the main entry point for running the model.</span>
+<span class="sd">    </span>
+<span class="sd">    :param case_study_name: the name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param model_name: the name of the model</span>
+<span class="sd">    :type model_name: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">create_logger</span><span class="p">(</span><span class="n">case_study_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;log_dir&#39;</span><span class="p">])</span>
+    <span class="n">dh_model</span> <span class="o">=</span> <span class="n">HeatNetworkModel</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">input_dict</span> <span class="o">=</span> <span class="n">load_data_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span><span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+
+    <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat nodes data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat generation units data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Heat generation units data is missing&quot;</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_demand&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat demand data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Heat demand data is missing&quot;</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Waste heat profile data is missing&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Missing input data (e.g., heat nodes, heat generation units, heat demand)&quot;</span>
+
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">:</span> <span class="s1">&#39;node&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;source&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;O&amp;M and Fuel Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;OMVarCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Power Investment Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;PowerInvCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Storage Investment Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;StorageInvCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;source&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Even zero demand is needed to create the balance at each node</span>
+    <span class="n">heat_gen_units</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="n">heat_gen_units</span><span class="p">:</span>
+        <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_demand&#39;</span><span class="p">][</span><span class="s1">&#39;heat_unit_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">hg</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">fill_model_data</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">initialize_variables</span><span class="p">()</span>
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">initialize_constraints</span><span class="p">()</span>
+    <span class="n">slvr_res</span> <span class="o">=</span> <span class="n">dh_model</span><span class="o">.</span><span class="n">model_run</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MODEL SOLUTION&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;==============&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slvr_res</span><span class="p">))</span>
+
+    <span class="n">res_dict</span> <span class="o">=</span> <span class="n">dh_model</span><span class="o">.</span><span class="n">export_model_variables</span><span class="p">()</span>
+    <span class="n">output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;output_dir&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">res_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exported: &quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span></div>
+
+    
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">case_study_name</span> <span class="o">=</span> <span class="s1">&#39;Puertollano&#39;</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;realistic_costs&#39;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">create_logger</span><span class="p">(</span><span class="n">case_study_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;log_dir&#39;</span><span class="p">])</span>
+    <span class="n">dh_model</span> <span class="o">=</span> <span class="n">HeatNetworkModel</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">input_dict</span> <span class="o">=</span> <span class="n">load_data_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span><span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+
+    <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat nodes data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat generation units data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Heat generation units data is missing&quot;</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_demand&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Heat demand data is missing&quot;</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Heat demand data is missing&quot;</span>
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Waste heat profile data is missing&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">error</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Missing input data (e.g., heat nodes, heat generation units, heat demand)&quot;</span>
+
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">:</span> <span class="s1">&#39;node&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;source&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;O&amp;M and Fuel Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;OMVarCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Power Investment Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;PowerInvCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Storage Investment Costs&#39;</span><span class="p">:</span> <span class="s1">&#39;StorageInvCost&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;waste_heat_prof&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="s1">&#39;source&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Even zero demand is needed to create the balance at each node</span>
+    <span class="n">heat_gen_units</span> <span class="o">=</span> <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="k">for</span> <span class="n">hg</span> <span class="ow">in</span> <span class="n">heat_gen_units</span><span class="p">:</span>
+        <span class="n">input_dict</span><span class="p">[</span><span class="s1">&#39;heat_demand&#39;</span><span class="p">][</span><span class="s1">&#39;heat_unit_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">hg</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">fill_model_data</span><span class="p">(</span><span class="n">input_dict</span><span class="p">)</span>
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">initialize_variables</span><span class="p">()</span>
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">initialize_constraints</span><span class="p">()</span>
+
+
+    <span class="n">slvr_res</span> <span class="o">=</span> <span class="n">dh_model</span><span class="o">.</span><span class="n">model_run</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;MODEL SOLUTION&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;==============&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">slvr_res</span><span class="p">))</span>
+
+    <span class="n">res_dict</span> <span class="o">=</span> <span class="n">dh_model</span><span class="o">.</span><span class="n">export_model_variables</span><span class="p">()</span>
+    <span class="n">output_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;output_dir&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_folder</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">res_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">v</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_folder</span><span class="p">,</span> <span class="n">k</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exported: &quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+
+    <span class="n">dh_model</span><span class="o">.</span><span class="n">export_results</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,686 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hd_time_series_generator &mdash; fancy name - tbd 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8cfa8c60"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            fancy name - tbd
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">fancy name - tbd</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">hd_time_series_generator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for hd_time_series_generator</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">cprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">jit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">data</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">data</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_temp_data</span>
+
+<div class="viewcode-block" id="prepare_temp_out">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.prepare_temp_out">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_temp_out</span><span class="p">(</span><span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare the outside temperature data for the simulation.</span>
+
+<span class="sd">    Based on the datetime index, the function adds a column to indicate whether the day is a business day or not.</span>
+
+<span class="sd">    :param scenario: _description_</span>
+<span class="sd">    :type scenario: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    :return: pandas dataframe with the outside temperature</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_temperature</span> <span class="o">=</span> <span class="n">load_temp_data</span><span class="p">(</span><span class="n">scenario</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># add info if it is a buisness day or not</span>
+    <span class="n">df_temperature</span><span class="p">[</span><span class="s1">&#39;businesday&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_temperature</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">weekday</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="c1"># rename the columns</span>
+    <span class="n">df_temperature</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;temperature&#39;</span><span class="p">,</span> <span class="s1">&#39;businesday&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">df_temperature</span></div>
+
+
+
+<div class="viewcode-block" id="write_hdts_to_disk">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.write_hdts_to_disk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_hdts_to_disk</span><span class="p">(</span><span class="n">df_heating</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">casestudy</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Write the heating demand time series to disk.</span>
+
+<span class="sd">    This function checks if the directory exists and creates it if not. Then it saves the heating demand time series to a CSV file.</span>
+<span class="sd">    For large datasets, this can take a while. Cosider other data formats if this becomes a problem.</span>
+
+<span class="sd">    :param df_heating: pandas dataframe with the heating demand for buildings</span>
+<span class="sd">    :type df_heating: pd.DataFrame</span>
+<span class="sd">    :param casestudy: name of the case study</span>
+<span class="sd">    :type casestudy: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># check if directory exists</span>
+    <span class="n">data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">casestudy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">data_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+    <span class="n">df_heating</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;building_data&#39;</span><span class="p">][</span><span class="s1">&#39;building_TS&#39;</span><span class="p">]),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="c1">## new functions for the fast implementation</span>
+<div class="viewcode-block" id="fast_TS_generator">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.fast_TS_generator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fast_TS_generator</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">save_to_disk</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs a complete run of the time series generator for a given case study.</span>
+
+<span class="sd">    This function loads the necessary data, processes it, and generates time series data for buildings.</span>
+<span class="sd">    Steps:</span>
+<span class="sd">    </span>
+<span class="sd">    1. Load the configuration file.</span>
+<span class="sd">    2. Load the transition matrices for weekdays (WD) and weekends (WE).</span>
+<span class="sd">    3. Load and process temperature data.</span>
+<span class="sd">    4. Initialize arrays for internal and solar gains.</span>
+<span class="sd">    5. Load building data as a GeoDataFrame.</span>
+<span class="sd">    6. Convert building data to dwelling-specific arrays.</span>
+<span class="sd">    7. Generate time series for each dwelling using thermal properties and external conditions.</span>
+<span class="sd">    8. Aggregate dwelling-level time series into building-level time series.</span>
+<span class="sd">    9. Save the resulting time series to disk as a CSV file.</span>
+
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param save_to_disk: set to true if you want to write the results into a csv. file, defaults to False</span>
+<span class="sd">    :type save_to_disk: bool, optional</span>
+<span class="sd">    :return: a pandas dataframe with the generated time series data in hourly resolution for all buildings</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start processing for case study: &quot;</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">)</span>
+    <span class="c1"># load config file</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load config&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+
+    <span class="c1"># load the transition matrix</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;parameter_dir&quot;</span><span class="p">],</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;MCMC_dir&quot;</span><span class="p">])</span>
+    <span class="n">df_transition_matrix_WD</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;case_study_data&quot;</span><span class="p">][</span><span class="s2">&quot;transition_matrix_WD&quot;</span><span class="p">]),</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">df_transition_matrix_WE</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;case_study_data&quot;</span><span class="p">][</span><span class="s2">&quot;transition_matrix_WE&quot;</span><span class="p">]),</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="n">ar_transition_matrix_WD</span> <span class="o">=</span> <span class="n">df_transition_matrix_WD</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">ar_transition_matrix_WE</span> <span class="o">=</span> <span class="n">df_transition_matrix_WE</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load transition matrix&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="c1"># load the temperature data</span>
+    <span class="n">df_temperature</span> <span class="o">=</span> <span class="n">prepare_temp_out</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">ar_Tout</span> <span class="o">=</span> <span class="n">df_temperature</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">ar_WDWE</span> <span class="o">=</span> <span class="n">calc_WD_WE_sequence</span><span class="p">(</span><span class="n">df_temperature</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load temperature data&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="c1"># load the time series data from solar gain and internal gain</span>
+    <span class="n">df_solar_gain</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_solar_gain_data</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">ar_solar_gain_profile</span> <span class="o">=</span> <span class="n">df_solar_gain</span><span class="p">[</span><span class="s1">&#39;solar_gain&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+
+    <span class="c1"># load geodataframe</span>
+    <span class="n">gdf_buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">&quot;building_data&quot;</span><span class="p">][</span><span class="s2">&quot;buildings_gdf&quot;</span><span class="p">]))</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load building data&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="c1"># convert the dataframe to individual arrays; from building data to dwelling data</span>
+    <span class="n">ar_building_id</span><span class="p">,</span> <span class="n">ar_num_of_dwellings</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCond</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCap</span><span class="p">,</span> <span class="n">ar_MaxDemand</span><span class="p">,</span> <span class="n">ar_temp_setpoint</span><span class="p">,</span> <span class="n">ar_temp_setback</span><span class="p">,</span> <span class="n">ar_solar_gain_scalor</span><span class="p">,</span> <span class="n">ar_internal_gain_scalor</span> <span class="o">=</span> <span class="n">convert_buildings_to_dwellings</span><span class="p">(</span><span class="n">gdf_buildings</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Start generating time series for: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">)</span><span class="si">}</span><span class="s2"> dwellings. Estimated computational time is: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">)</span><span class="o">/</span><span class="mi">378</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> seconds.&quot;</span><span class="p">)</span>
+    <span class="n">dwelling_HD_TS</span> <span class="o">=</span> <span class="n">fast_generate_building_ts</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCond</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCap</span><span class="p">,</span> <span class="n">ar_MaxDemand</span><span class="p">,</span> <span class="n">ar_temp_setpoint</span><span class="p">,</span> <span class="n">ar_temp_setback</span><span class="p">,</span> <span class="n">ar_Tout</span><span class="p">,</span> <span class="n">ar_WDWE</span><span class="p">,</span> <span class="n">ar_transition_matrix_WD</span><span class="p">,</span> <span class="n">ar_transition_matrix_WE</span><span class="p">,</span> <span class="n">ar_solar_gain_profile</span><span class="p">,</span> <span class="n">ar_solar_gain_scalor</span><span class="p">,</span> <span class="n">ar_internal_gain_scalor</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: generate time series&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="c1"># convert the dwelling time series to building time series</span>
+    <span class="n">df_building_HD_TS</span>  <span class="o">=</span> <span class="n">convert_dwelling_TS_to_building_TS</span><span class="p">(</span><span class="n">dwelling_HD_TS</span><span class="p">,</span> <span class="n">ar_building_id</span><span class="p">)</span>
+
+    <span class="c1"># check the results</span>
+    <span class="n">check_yearly_demand_deviation</span><span class="p">(</span><span class="n">gdf_buildings</span><span class="p">,</span> <span class="n">df_building_HD_TS</span><span class="p">)</span>
+
+    <span class="c1"># generate a sum over all buildings</span>
+    <span class="n">df_building_HD_TS</span><span class="p">[</span><span class="s1">&#39;sum&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_building_HD_TS</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># write the time series to disk</span>
+    <span class="k">if</span> <span class="n">save_to_disk</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Write time series to disk&quot;</span><span class="p">)</span>
+        <span class="c1"># save as csv file</span>
+        <span class="n">df_building_HD_TS</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;building_data&#39;</span><span class="p">][</span><span class="s1">&#39;building_TS&#39;</span><span class="p">]),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: write time series to disk&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_building_HD_TS</span></div>
+
+
+<div class="viewcode-block" id="calc_WD_WE_sequence">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.calc_WD_WE_sequence">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_WD_WE_sequence</span><span class="p">(</span><span class="n">df_temperature</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates a seqeunce of business days and weekends based on the date of the dataset.</span>
+
+<span class="sd">    :param df_temperature: pandas dataframe with the temperature data and the date</span>
+<span class="sd">    :type df_temperature: pd.DataFrame</span>
+<span class="sd">    :return: numpy array with the sequence of business days and weekends</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># buisnesday = 1, weekend = 0</span>
+    <span class="n">df_temp_local</span> <span class="o">=</span> <span class="n">df_temperature</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Ensure the index is a datetime type</span>
+    <span class="n">df_temp_local</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_temp_local</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span>
+    <span class="n">df_temp_local</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Regroup the df_temp to daily values</span>
+    <span class="n">df_temp_local</span> <span class="o">=</span> <span class="n">df_temp_local</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df_temp_local</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">date</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="c1"># export the column buisnesday as a np array</span>
+    <span class="n">ar_WEWDseq</span> <span class="o">=</span> <span class="n">df_temp_local</span><span class="p">[</span><span class="s2">&quot;businesday&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+   
+    <span class="k">return</span> <span class="n">ar_WEWDseq</span></div>
+
+
+<div class="viewcode-block" id="check_yearly_demand_deviation">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.check_yearly_demand_deviation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_yearly_demand_deviation</span><span class="p">(</span><span class="n">gdf_buildings</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">df_heat_demand</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check deviation of the yearly demand of the buildings from the sum of the heating demand time series.</span>
+
+<span class="sd">    :param gdf_buildings: geodataframe with the building data</span>
+<span class="sd">    :type gdf_buildings: gpd.GeoDataFrame</span>
+<span class="sd">    :param df_heat_demand: dataframe with the heating demand time series</span>
+<span class="sd">    :type df_heat_demand: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># calculate the difference on building level</span>
+    <span class="n">diff_abs</span> <span class="o">=</span> <span class="mf">1e3</span><span class="o">*</span> <span class="n">gdf_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">df_heat_demand</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">diff_percent</span> <span class="o">=</span> <span class="n">diff_abs</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e3</span> <span class="o">*</span> <span class="n">gdf_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+    <span class="n">diff_percent</span><span class="p">[</span><span class="n">gdf_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># calc max deviation of absolute values</span>
+    <span class="n">max_diff_percent</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">diff_percent</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="c1"># calc the total deviation of the absolute values</span>
+    <span class="n">total_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">diff_abs</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">total_diff_percent</span> <span class="o">=</span> <span class="n">total_diff</span> <span class="o">/</span> <span class="p">(</span><span class="mf">1e3</span><span class="o">*</span> <span class="n">gdf_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">*</span> <span class="mi">100</span>
+
+    <span class="k">if</span> <span class="n">max_diff_percent</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Warning: The yearly demand of a building deviates from the sum of the heating demand time series!&quot;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max deviation on single building level: </span><span class="si">{</span><span class="n">max_diff_percent</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> %&quot;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;The yearly demand of of all building is close to the sum of the heating demand time series&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Max deviation on single building level: </span><span class="si">{</span><span class="n">max_diff_percent</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> %&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">total_diff_percent</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Warning: The total yearly demand of the buildings deviates from the sum of the heating demand time series!&quot;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total deviation in heat demand: </span><span class="si">{</span><span class="n">total_diff_percent</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> %&quot;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;The yearly demand of all buildings is close to the sum of the heating demand time series&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="n">cprint</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total deviation in heat demand: </span><span class="si">{</span><span class="n">total_diff_percent</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> %&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+
+
+    
+
+<div class="viewcode-block" id="convert_buildings_to_dwellings">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.convert_buildings_to_dwellings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_buildings_to_dwellings</span><span class="p">(</span><span class="n">gdf_buildings</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert the building data to dwelling data and split the data into individual arrays.</span>
+
+<span class="sd">    This function takes the building data and splits it into individual arrays for each dwelling. The arrays are then used to generate the heating demand time series.</span>
+
+<span class="sd">    :param gdf_buildings: geodataframe with the building data</span>
+<span class="sd">    :type gdf_buildings: gpd.GeoDataFrame</span>
+<span class="sd">    :return: individual arrays for the different building properties</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_buildings</span> <span class="o">=</span> <span class="n">gdf_buildings</span><span class="p">[[</span><span class="s1">&#39;building_id&#39;</span><span class="p">,</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCond&#39;</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCap&#39;</span><span class="p">,</span><span class="s1">&#39;MaxDemand&#39;</span><span class="p">,</span><span class="s1">&#39;temp_setpoint&#39;</span><span class="p">,</span><span class="s1">&#39;temp_setback&#39;</span><span class="p">,</span><span class="s1">&#39;InternalGainFactor&#39;</span><span class="p">,</span><span class="s1">&#39;SolarGainFactor&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># convert the buidling_id to int after spliting the string</span>
+    <span class="n">df_buildings</span><span class="p">[</span><span class="s1">&#39;building_id_int&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_buildings</span><span class="p">[</span><span class="s1">&#39;building_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+
+    <span class="c1"># count the number of buildings with zero dwellings</span>
+    <span class="n">buildings_zero_dwellings</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_buildings</span><span class="p">[</span><span class="n">df_buildings</span><span class="p">[</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># count the number of buildings with zero dwellings</span>
+    <span class="n">total_number_of_dwelling</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="p">[</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">total_count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">buildings_zero_dwellings</span> <span class="o">+</span> <span class="n">total_number_of_dwelling</span><span class="p">)</span>
+
+
+    <span class="c1"># write the required building properties into a np.array -&gt; the index in the array takes care of the position and has to be merged back afterwards</span>
+    <span class="n">ar_building_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_num_of_dwellings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_GeneralisedThermCond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_GeneralisedThermCap</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_MaxDemand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_temp_setpoint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_temp_setback</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_solar_gain_scalor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+    <span class="n">ar_internal_gain_scalor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">total_count</span><span class="p">)</span>
+
+    <span class="n">df_buildings</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+    <span class="c1"># assign the values from the dataframe to the array</span>
+    <span class="n">array_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="nb">iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df_buildings</span><span class="p">)):</span>
+        <span class="n">temp_num_of_dwellings</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">])</span>
+
+
+        <span class="k">if</span> <span class="n">temp_num_of_dwellings</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">ar_building_id</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;building_id_int&#39;</span><span class="p">])</span>
+            <span class="n">ar_num_of_dwellings</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_num_of_dwellings</span>
+            <span class="n">ar_GeneralisedThermCond</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCond&#39;</span><span class="p">]</span>
+            <span class="n">ar_GeneralisedThermCap</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCap&#39;</span><span class="p">]</span>
+            <span class="n">ar_MaxDemand</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;MaxDemand&#39;</span><span class="p">]</span>
+            <span class="n">ar_temp_setpoint</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;temp_setpoint&#39;</span><span class="p">]</span>
+            <span class="n">ar_temp_setback</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;temp_setback&#39;</span><span class="p">]</span>
+            <span class="n">ar_solar_gain_scalor</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;SolarGainFactor&#39;</span><span class="p">]</span>
+            <span class="n">ar_internal_gain_scalor</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;InternalGainFactor&#39;</span><span class="p">]</span>
+
+            <span class="n">array_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sub_iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">temp_num_of_dwellings</span><span class="p">):</span>
+                <span class="n">ar_building_id</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;building_id_int&#39;</span><span class="p">])</span>
+                <span class="n">ar_num_of_dwellings</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_num_of_dwellings</span>
+                <span class="n">ar_GeneralisedThermCond</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCond&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">temp_num_of_dwellings</span>
+                <span class="n">ar_GeneralisedThermCap</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCap&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">temp_num_of_dwellings</span>
+                <span class="n">ar_MaxDemand</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;MaxDemand&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">temp_num_of_dwellings</span>
+                <span class="n">ar_temp_setpoint</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;temp_setpoint&#39;</span><span class="p">]</span>
+                <span class="n">ar_temp_setback</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;temp_setback&#39;</span><span class="p">]</span>
+                <span class="n">ar_solar_gain_scalor</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;SolarGainFactor&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">temp_num_of_dwellings</span>
+                <span class="n">ar_internal_gain_scalor</span><span class="p">[</span><span class="n">array_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_buildings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="nb">iter</span><span class="p">,</span><span class="s1">&#39;InternalGainFactor&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">temp_num_of_dwellings</span>
+
+                <span class="n">array_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">ar_building_id</span><span class="p">,</span> <span class="n">ar_num_of_dwellings</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCond</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCap</span><span class="p">,</span> <span class="n">ar_MaxDemand</span><span class="p">,</span> <span class="n">ar_temp_setpoint</span><span class="p">,</span> <span class="n">ar_temp_setback</span><span class="p">,</span> <span class="n">ar_solar_gain_scalor</span><span class="p">,</span> <span class="n">ar_internal_gain_scalor</span></div>
+
+
+
+<div class="viewcode-block" id="convert_dwelling_TS_to_building_TS">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.convert_dwelling_TS_to_building_TS">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_dwelling_TS_to_building_TS</span><span class="p">(</span><span class="n">dwelling_HD_TS</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_building_id</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum up the heating demand time series for all dwellings in a building and convert the data to a pandas dataframe.</span>
+
+<span class="sd">    This function takes the heating demand time series for all dwellings and sums them up for each building. The resulting data is then converted to a pandas dataframe.</span>
+
+<span class="sd">    :param dwelling_HD_TS: numpy array with the heating demand time series for all dwellings</span>
+<span class="sd">    :type dwelling_HD_TS: np.ndarray</span>
+<span class="sd">    :param ar_building_id: numpy array with the building id for each dwelling</span>
+<span class="sd">    :type ar_building_id: np.ndarray</span>
+<span class="sd">    :return: pandas dataframe with the heating demand time series for all buildings</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># transfrom the array down to a dataframe</span>
+    <span class="n">df_dwelling_HD_TS</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dwelling_HD_TS</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+    <span class="c1"># add the building id to the dataframe</span>
+    <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;building_id&#39;</span><span class="p">,</span> <span class="n">ar_building_id</span><span class="p">)</span>
+
+    <span class="c1"># regroup the data by building id and sum the values</span>
+    <span class="n">df_dwelling_HD_TS</span> <span class="o">=</span> <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;building_id&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># transpose the datatframe</span>
+    <span class="n">df_dwelling_HD_TS</span> <span class="o">=</span> <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="c1"># rename the columns </span>
+    <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;building_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="p">)]</span>
+
+    <span class="c1"># add a column for the hour</span>
+    <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;hour&#39;</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_dwelling_HD_TS</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="c1"># Multiply all columns except the first one by 1e3 to convert to Wh</span>
+    <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="mf">1e3</span>
+
+    <span class="c1"># Cast the DataFrame to uint32 to save memory</span>
+    <span class="n">df_dwelling_HD_TS_cast</span> <span class="o">=</span> <span class="n">df_dwelling_HD_TS</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;uint32&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df_dwelling_HD_TS_cast</span></div>
+
+
+<span class="c1">#@jit -&gt; vectorized implementation instead</span>
+<div class="viewcode-block" id="fast_generate_building_ts">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.fast_generate_building_ts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fast_generate_building_ts</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCond</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_GeneralisedThermCap</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_MaxDemand</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_temp_setpoint</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_temp_setback</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_Tout</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_WDWE</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_transition_matrix_WD</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_transition_matrix_WE</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_solar_gain_profile</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scalor_solar_gain</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scalor_internal_gain</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function generates the heating demand time series for all dwellings.</span>
+
+<span class="sd">    This function provides a fast implementation of the heating demand time series generator. It uses vectorized operations to speed up the calculations.</span>
+<span class="sd">    All input data has to be provided as numpy arrays. The function returns a numpy array with the heating demand time series for all dwellings.</span>
+
+<span class="sd">    :param ar_building_id: A numpy array with the corresponding building id for each dwelling.</span>
+<span class="sd">    :type ar_building_id: np.ndarray</span>
+<span class="sd">    :param ar_GeneralisedThermCond: A numpy array with the generalised thermal conductance for each dwelling.</span>
+<span class="sd">    :type ar_GeneralisedThermCond: np.ndarray</span>
+<span class="sd">    :param ar_GeneralisedThermCap: A numpy array with the generalised thermal capacity for each dwelling.</span>
+<span class="sd">    :type ar_GeneralisedThermCap: np.ndarray</span>
+<span class="sd">    :param ar_MaxDemand: A numpy array with the maximum heating demand for each dwelling.</span>
+<span class="sd">    :type ar_MaxDemand: np.ndarray</span>
+<span class="sd">    :param ar_temp_setpoint: A numpy array with the setpoint temperature for each dwelling.</span>
+<span class="sd">    :type ar_temp_setpoint: np.ndarray</span>
+<span class="sd">    :param ar_temp_setback: A numpy array with the setback temperature for each dwelling.</span>
+<span class="sd">    :type ar_temp_setback: np.ndarray</span>
+<span class="sd">    :param ar_Tout: A numpy array with the outside temperature for each time step.</span>
+<span class="sd">    :type ar_Tout: np.ndarray</span>
+<span class="sd">    :param ar_WDWE: A numpy array with the sequence of business days and weekends.</span>
+<span class="sd">    :type ar_WDWE: np.ndarray</span>
+<span class="sd">    :param ar_transition_matrix_WD: A numpy array with the transition matrix for weekdays.</span>
+<span class="sd">    :type ar_transition_matrix_WD: np.ndarray</span>
+<span class="sd">    :param ar_transition_matrix_WE: A numpy array with the transition matrix for weekends.</span>
+<span class="sd">    :type ar_transition_matrix_WE: np.ndarray</span>
+<span class="sd">    :param ar_solar_gain_profile: A numpy array with the general solar gain (= solar irradiation) for each time step.</span>
+<span class="sd">    :type ar_solar_gain_profile: np.ndarray</span>
+<span class="sd">    :param scalor_solar_gain: A numpy array with the scaling factor for the solar gain for each dwelling.</span>
+<span class="sd">    :type scalor_solar_gain: np.ndarray</span>
+<span class="sd">    :param scalor_internal_gain: A numpy array with the scaling factor for the internal gain for each dwelling.</span>
+<span class="sd">    :type scalor_internal_gain: np.ndarray</span>
+<span class="sd">    :return: A numpy array with the heating demand time series for all dwellings.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># initialise an empty array for the heating demand for all dwellings and the time steps</span>
+    <span class="n">ar_heating_demand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">)))</span>
+
+    <span class="c1"># Vectorized implementation</span>
+    <span class="c1"># Generate occupancy time series for all buildings</span>
+    <span class="n">yearly_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">calc_yearly_occupancy</span><span class="p">(</span><span class="n">ar_WDWE</span><span class="p">,</span> <span class="n">ar_transition_matrix_WD</span><span class="p">,</span> <span class="n">ar_transition_matrix_WE</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">))])</span>
+    <span class="n">ar_Tset</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">assign_temp</span><span class="p">(</span><span class="n">yearly_states</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ar_temp_setpoint</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ar_temp_setback</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
+  
+    <span class="c1"># calculte the solar gain with same profile for all buildings</span>
+    <span class="n">ar_solar_gain</span> <span class="o">=</span> <span class="n">ar_solar_gain_profile</span>
+    <span class="c1"># calculate the internal gaing profile with a different profile for each building</span>
+    <span class="n">ar_internal_gain</span> <span class="o">=</span> <span class="n">yearly_states</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># Generate heating demand time series for all buildings</span>
+    <span class="n">ar_heating_demand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+        <span class="n">fast_calculate_hd_ts</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">,</span> <span class="n">ar_Tset</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">ar_internal_gain</span><span class="p">[:,</span><span class="n">j</span><span class="p">],</span> <span class="n">ar_solar_gain</span><span class="p">,</span> <span class="n">ar_MaxDemand</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">ar_GeneralisedThermCond</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">ar_GeneralisedThermCap</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">scalor_solar_gain</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">scalor_internal_gain</span><span class="p">[</span><span class="n">j</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_building_id</span><span class="p">))</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">return</span> <span class="n">ar_heating_demand</span></div>
+
+
+
+<div class="viewcode-block" id="fast_calculate_hd_ts">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.fast_calculate_hd_ts">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fast_calculate_hd_ts</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_Tset</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_internal_gain</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_solar_gain</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">max_heat_power</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">thermal_coductance</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span> <span class="n">thermal_storage_capacity</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">scalor_solar_gain</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">scalor_internal_gain</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fast calculation of the heating demand time series for a single dwelling.</span>
+
+<span class="sd">    This function gets precompiled to speed up the calculations. All parameters and time series in the input are for a single dwelling.</span>
+<span class="sd">    </span>
+<span class="sd">    :param ar_Tout: A numpy array with the outside temperature for each time step in °C.</span>
+<span class="sd">    :type ar_Tout: np.ndarray</span>
+<span class="sd">    :param ar_Tset: A numpy array with the setpoint temperature for each time step in °C.</span>
+<span class="sd">    :type ar_Tset: np.ndarray</span>
+<span class="sd">    :param ar_internal_gain: A numpy array with the internal gain for each time step in kW.</span>
+<span class="sd">    :type ar_internal_gain: np.ndarray</span>
+<span class="sd">    :param ar_solar_gain: A numpy array with the solar gain for each time step in kW.</span>
+<span class="sd">    :type ar_solar_gain: np.ndarray</span>
+<span class="sd">    :param max_heat_power: Maximum heating power for that dwelling in kW, defaults to 15.0</span>
+<span class="sd">    :type max_heat_power: float, optional</span>
+<span class="sd">    :param thermal_coductance: generalised thermal conductance in kW/K for the specific dwelling, defaults to 0.12</span>
+<span class="sd">    :type thermal_coductance: float, optional</span>
+<span class="sd">    :param thermal_storage_capacity: generalised thermal storage capacity in kWh/K for the specific dwelling, defaults to 7.0</span>
+<span class="sd">    :type thermal_storage_capacity: float, optional</span>
+<span class="sd">    :param scalor_solar_gain: Scaling factor for the solar gain of the specific dwelling, defaults to 0.0</span>
+<span class="sd">    :type scalor_solar_gain: float, optional</span>
+<span class="sd">    :param scalor_internal_gain: Scaling factor for the internal gain for the specific dwelling, defaults to 0.0</span>
+<span class="sd">    :type scalor_internal_gain: float, optional</span>
+<span class="sd">    :return: returns the heating demand time series and the indoor temperature time series for the dwelling</span>
+<span class="sd">    :rtype: tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># initialise the heating demand array</span>
+    <span class="n">ar_T_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">)))</span>
+    <span class="n">ar_actual_heat_power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">)))</span> <span class="c1"># the power that is accually used for heating</span>
+
+    <span class="c1"># set values for the first time step</span>
+    <span class="n">ar_T_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ar_Tset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># calculate a heating demand for time step 0 just based on the current termal losses</span>
+    <span class="n">Q_losses</span> <span class="o">=</span> <span class="n">thermal_coductance</span><span class="o">*</span><span class="p">(</span><span class="n">ar_T_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ar_Tout</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1">#heating_for_T_change = thermal_storage_capacity * (ar_Tset[0] - ar_T_in[0]) # required heating to change the temperature</span>
+    <span class="n">heat_demand</span> <span class="o">=</span> <span class="n">Q_losses</span> <span class="c1">#+ heating_for_T_change</span>
+    <span class="n">actual_heating_power</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_heat_power</span><span class="p">,</span> <span class="n">heat_demand</span><span class="p">))</span>
+    <span class="n">ar_actual_heat_power</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">actual_heating_power</span>
+
+    <span class="c1"># iterate over the time steps</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ar_Tout</span><span class="p">)):</span>
+        <span class="c1"># calculate the losses</span>
+        <span class="n">Q_losses</span> <span class="o">=</span> <span class="n">thermal_coductance</span><span class="o">*</span><span class="p">(</span><span class="n">ar_T_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ar_Tout</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># for t-1</span>
+        <span class="c1"># calculate the internal gain</span>
+        <span class="n">total_gain</span> <span class="o">=</span> <span class="n">ar_internal_gain</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scalor_internal_gain</span> <span class="o">+</span> <span class="n">ar_solar_gain</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">scalor_solar_gain</span> <span class="c1"># for t-1</span>
+        <span class="c1"># calculate the current indoor temperature</span>
+        <span class="n">T_in</span> <span class="o">=</span> <span class="n">ar_T_in</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ar_actual_heat_power</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">total_gain</span> <span class="o">-</span> <span class="n">Q_losses</span><span class="p">)</span> <span class="o">/</span> <span class="n">thermal_storage_capacity</span>
+        <span class="c1"># calculate the heating demand</span>
+        <span class="n">heating_for_T_change</span> <span class="o">=</span> <span class="n">thermal_storage_capacity</span> <span class="o">*</span> <span class="p">(</span><span class="n">ar_Tset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">T_in</span><span class="p">)</span>
+        <span class="c1">#calculate the heat demand</span>
+        <span class="n">heat_demand</span> <span class="o">=</span> <span class="n">thermal_coductance</span> <span class="o">*</span> <span class="p">(</span><span class="n">T_in</span><span class="o">-</span> <span class="n">ar_Tout</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="n">heating_for_T_change</span>
+        <span class="c1"># calculate the actual heating power</span>
+
+        <span class="n">actual_heating_power</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">min</span><span class="p">(</span><span class="n">max_heat_power</span><span class="p">,</span> <span class="n">heat_demand</span><span class="p">))</span>
+
+        <span class="c1"># set the calculated values as new values for the next iteration</span>
+        <span class="n">ar_T_in</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">T_in</span>
+        <span class="n">ar_actual_heat_power</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">actual_heating_power</span>
+
+
+    <span class="k">return</span> <span class="n">ar_actual_heat_power</span><span class="p">,</span> <span class="n">ar_T_in</span></div>
+
+
+
+
+<div class="viewcode-block" id="calc_yearly_occupancy">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.calc_yearly_occupancy">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">calc_yearly_occupancy</span><span class="p">(</span><span class="n">ar_WDWE</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_transition_matrix_WD</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ar_transition_matrix_WE</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculates the yearly occupancy time series for a given sequence of business days and weekends by Markov Chain Monte Carlo (MCMC) simulation.</span>
+
+<span class="sd">    :param ar_WDWE: A numpy array with the sequence of business days and weekends.</span>
+<span class="sd">    :type ar_WDWE: np.ndarray</span>
+<span class="sd">    :param ar_transition_matrix_WD: A numpy array with the transition matrix for weekdays.</span>
+<span class="sd">    :type ar_transition_matrix_WD: np.ndarray</span>
+<span class="sd">    :param ar_transition_matrix_WE: A numpy array with the transition matrix for weekends.</span>
+<span class="sd">    :type ar_transition_matrix_WE: np.ndarray</span>
+<span class="sd">    :return: A numpy array with the yearly occupancy time series in hourly resolution.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">states_WD</span> <span class="o">=</span> <span class="n">fast_generate_mcchain</span><span class="p">(</span><span class="n">ar_transition_matrix_WD</span><span class="p">)</span>
+    <span class="n">states_WE</span> <span class="o">=</span> <span class="n">fast_generate_mcchain</span><span class="p">(</span><span class="n">ar_transition_matrix_WE</span><span class="p">)</span>
+
+    <span class="n">yearly_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">ar_WDWE</span><span class="p">)</span> <span class="o">*</span> <span class="mi">24</span><span class="p">))</span> 
+
+    <span class="c1">#if yearly_states.max() != yearly_states.max():</span>
+    <span class="c1">#    print(&quot;Warning 1: The yearly occupancy time series contains NaN values. Please check the input data.&quot;)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ar_WDWE</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">ar_WDWE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">yearly_states</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">24</span><span class="p">:</span><span class="n">i</span><span class="o">*</span><span class="mi">24</span><span class="o">+</span><span class="mi">24</span><span class="p">]</span> <span class="o">=</span> <span class="n">states_WD</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">yearly_states</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">24</span><span class="p">:</span><span class="n">i</span><span class="o">*</span><span class="mi">24</span><span class="o">+</span><span class="mi">24</span><span class="p">]</span> <span class="o">=</span> <span class="n">states_WE</span>
+
+    <span class="k">return</span> <span class="n">yearly_states</span></div>
+
+
+
+<div class="viewcode-block" id="assign_temp">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.assign_temp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">assign_temp</span><span class="p">(</span><span class="n">ar_states</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">T_setpoint</span> <span class="o">=</span> <span class="mf">22.0</span><span class="p">,</span> <span class="n">T_setback</span> <span class="o">=</span> <span class="mf">18.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Assigns the setpoint temperature to the states based on the occupancy time series.</span>
+
+<span class="sd">    This function takes the occupancy time series and assigns the setpoint temperature to the states. The setpoint temperature is assigned to the states where the occupancy is 1 (occupied) and the setback temperature is assigned to the states where the occupancy is 0 (unoccupied).</span>
+<span class="sd">    The function returns the states with the assigned temperatures.</span>
+
+<span class="sd">    :param ar_states: A numpy array with the occupancy time series for one year in hourly resolution.</span>
+<span class="sd">    :type ar_states: np.ndarray</span>
+<span class="sd">    :param T_setpoint: Setpoint temperature in °C, defaults to 22.0</span>
+<span class="sd">    :type T_setpoint: float, optional</span>
+<span class="sd">    :param T_setback: Setback temperature in °C, defaults to 18.0</span>
+<span class="sd">    :type T_setback: float, optional</span>
+<span class="sd">    :return: A numpy array with the setpoint temperature.</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># assign the setpoint temperature to the states</span>
+    <span class="n">ar_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ar_states</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">T_setpoint</span><span class="p">,</span> <span class="n">T_setback</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ar_states</span></div>
+
+
+<div class="viewcode-block" id="fast_generate_mcchain">
+<a class="viewcode-back" href="../modules/hd_time_series_generator.html#hd_time_series_generator.fast_generate_mcchain">[docs]</a>
+<span class="nd">@jit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fast_generate_mcchain</span><span class="p">(</span><span class="n">ar_transition_matrix</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ini_prob</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">resample</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a Markov Chain Monte Carlo (MCMC) chain based on the transition matrix for one day.</span>
+
+<span class="sd">    :param ar_transition_matrix: A numpy array with the transition matrix for one day.</span>
+<span class="sd">    :type ar_transition_matrix: np.ndarray</span>
+<span class="sd">    :param ini_prob: probability for active for the first time step, defaults to 0.2</span>
+<span class="sd">    :type ini_prob: float, optional</span>
+<span class="sd">    :param resample: boole flag: if True the 10-min profile is converted to hourly resolution, defaults to True</span>
+<span class="sd">    :type resample: bool, optional</span>
+<span class="sd">    :return: a numpy array with the MCMC chain in hourly (or 10-min) resolution</span>
+<span class="sd">    :rtype: np.ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># initialise an empty array to store the MCMC chain</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">144</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> <span class="c1">#, dtype=bool)</span>
+
+
+    <span class="c1"># set fist state to a random state</span>
+    <span class="n">r_ini</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">r_ini</span> <span class="o">&lt;</span> <span class="n">ini_prob</span><span class="p">:</span>
+        <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">states</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># iterate over the MCMC chain</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ar_transition_matrix</span><span class="p">)):</span>
+        <span class="c1"># get the previous state</span>
+        <span class="n">prev_state</span> <span class="o">=</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">()</span>
+
+        <span class="c1"># get the transition probabilities for the previous state</span>
+        <span class="k">if</span> <span class="n">prev_state</span><span class="p">:</span> <span class="c1"># if previsou state is True, use columns 1</span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">ar_transition_matrix</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>   
+                <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># if previous state is False, use columns 0 </span>
+            <span class="k">if</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="n">ar_transition_matrix</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]:</span>
+                <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>          
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># resample the states to 24 insted of 144 steps</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="c1"># calculate the average of the states for each day</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">6</span>
+    <span class="c1"># convert the states to a binary array</span>
+    <span class="n">states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">states</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+  
+
+    <span class="k">return</span> <span class="n">states</span></div>
+
+
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">case_study</span> <span class="o">=</span> <span class="s2">&quot;Frauental&quot;</span>
+    <span class="n">fast_TS_generator</span><span class="p">(</span><span class="n">case_study</span><span class="p">)</span>
+    <span class="k">pass</span>
+            
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

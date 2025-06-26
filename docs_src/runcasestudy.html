@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run a Case Study &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=40be6288"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules" href="modules/index.html" />
+    <link rel="prev" title="Project Structure and Settings" href="structparam.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run a Case Study</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#environment-and-packages">1. Environment and Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#retrieve-building-data">2. Retrieve Building Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-heat-demand-time-series">3. Generate Heat Demand Time Series</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cluster-data-and-prepare-network">4. Cluster Data and Prepare Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-optimization-model">5. Run the Optimization Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#visualize-the-results">6. Visualize the Results</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/index.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Run a Case Study</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/runcasestudy.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="run-a-case-study">
+<span id="how-to-run-a-case-study"></span><h1>Run a Case Study<a class="headerlink" href="#run-a-case-study" title="Link to this heading"></a></h1>
+<p>To run a case study, we recommend using the Jupyter notebook <code class="docutils literal notranslate"><span class="pre">main.ipynb</span></code>, where the full workflow is documented. Alternatively, you can call the functions from the command line or include them in a customized script.</p>
+<p>The following steps illustrate how to run a new case study step by step.</p>
+<section id="environment-and-packages">
+<h2>1. Environment and Packages<a class="headerlink" href="#environment-and-packages" title="Link to this heading"></a></h2>
+<p>Ensure that the environment is activated (see Section <a class="reference internal" href="quickstart.html#env-setup"><span class="std std-ref">Environment Setup</span></a>) and selected in Jupyter. Import the required modules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">prepare_geodata</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">hd_time_series_generator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">clustering</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">model</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">visualisation</span>
+</pre></div>
+</div>
+</section>
+<section id="retrieve-building-data">
+<h2>2. Retrieve Building Data<a class="headerlink" href="#retrieve-building-data" title="Link to this heading"></a></h2>
+<p>First, define a name for your case study, which will be used to identify all associated data and settings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">case_study_name</span> <span class="o">=</span> <span class="s2">&quot;my_first_casestudy&quot;</span>
+</pre></div>
+</div>
+<p>Next, specify the geographical location and extent of the case study using one of two methods:</p>
+<ul>
+<li><p><strong>(i) Named location</strong>: Any uniquely defined region in OpenStreetMap (OSM) can be used, such as &quot;Berlin, Germany&quot;.</p></li>
+<li><p><strong>(ii) Geoshape</strong>: Any valid polygon can be used. For convenience, use the helper function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">prepare_geodata</span><span class="o">.</span><span class="n">polygon_by_circle</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns a circular polygon around the specified center point (latitude and longitude) with a radius (in km).</p>
+</li>
+</ul>
+<p>Then generate the geospatial dataset:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gdf_buildings</span> <span class="o">=</span> <span class="n">prepare_geodata</span><span class="o">.</span><span class="n">generate_complete_geodataset</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">location</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns a GeoDataFrame containing preprocessed building data and heuristically estimated annual heat demand. The console output includes data completeness, applied assumptions, and warnings about missing values.</p>
+<p>You can perform a preliminary plausibility check, e.g. by evaluating total demand or building height ranges. For a spatial overview:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">visualisation</span><span class="o">.</span><span class="n">plot_HD_interactive</span><span class="p">(</span><span class="n">gdf_buildings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This opens an interactive map showing buildings color-coded by heat demand, with tooltips.</p>
+<p>To adapt the dataset (e.g. remove outliers), modify the file <code class="docutils literal notranslate"><span class="pre">Building_Data.geojson</span></code> manually.</p>
+<p>Note: Annual demand is influenced by building parameters defined in <code class="docutils literal notranslate"><span class="pre">Building_Typology.xlsx</span></code>. If you change this file, rerun the function above to update values.</p>
+</section>
+<section id="generate-heat-demand-time-series">
+<h2>3. Generate Heat Demand Time Series<a class="headerlink" href="#generate-heat-demand-time-series" title="Link to this heading"></a></h2>
+<p>Before generating time series, ensure the following files are prepared for your case study:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">outside_temp.xlsx</span></code> (outdoor temperatures)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">solar_gain.xlsx</span></code> (solar irradiation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transition_matrix_WD.xlsx</span></code> (weekday occupancy)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transition_matrix_WE.xlsx</span></code> (weekend occupancy)</p></li>
+</ul>
+<p>Details are described in Section <a class="reference internal" href="structparam.html#struct-param"><span class="std std-ref">Project Structure and Settings</span></a>.</p>
+<p>Then generate the heat demand time series:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">df_HD_time_series</span> <span class="o">=</span> <span class="n">hd_time_series_generator</span><span class="o">.</span><span class="n">fast_TS_generator</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This generates time series for all buildings and stores them in <code class="docutils literal notranslate"><span class="pre">Building_TS.csv</span></code>, which can also be reused for other analyses.</p>
+</section>
+<section id="cluster-data-and-prepare-network">
+<h2>4. Cluster Data and Prepare Network<a class="headerlink" href="#cluster-data-and-prepare-network" title="Link to this heading"></a></h2>
+<p>Multiple scenarios can be created for the same building dataset. To create a new scenario, define a name:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">clustering</span><span class="o">.</span><span class="n">perform_complete_clustering</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This creates a folder structure for the scenario and populates the <code class="docutils literal notranslate"><span class="pre">input</span></code> folder with editable templates:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">input_ParameterCosts.xlsx</span></code>: General parameters (e.g. pipe costs, temperature levels, number of clusters)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">input_HeatGenerationUnits.xlsx</span></code>: Investment candidates for generation units</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">input_WasteHeatProfiles.xlsx</span></code>: Time series for available waste heat capacity</p></li>
+</ul>
+<p>Details are described in Section <a class="reference internal" href="structparam.html#struct-param"><span class="std std-ref">Project Structure and Settings</span></a>.
+Make sure to keep the format of these templates consistent. Rerunning the clustering function will apply all changes and generate input data for the optimization model.</p>
+</section>
+<section id="run-the-optimization-model">
+<h2>5. Run the Optimization Model<a class="headerlink" href="#run-the-optimization-model" title="Link to this heading"></a></h2>
+<p>To run the model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">run_model</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Depending on complexity, the solver might run from a few minutes to several hours. Progress will be displayed in the console.</p>
+<p>To reduce computation time, try:</p>
+<ul class="simple">
+<li><p>Decreasing the number of clusters</p></li>
+<li><p>Increasing the MIP gap</p></li>
+</ul>
+<p>Once completed, results are saved in the scenario's <code class="docutils literal notranslate"><span class="pre">output</span></code> folder. Post-processed summaries are available in the <code class="docutils literal notranslate"><span class="pre">expost</span></code> folder, including investment decisions, cost breakdowns, and network design.</p>
+</section>
+<section id="visualize-the-results">
+<h2>6. Visualize the Results<a class="headerlink" href="#visualize-the-results" title="Link to this heading"></a></h2>
+<p>To generate standard plots:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">visualisation</span><span class="o">.</span><span class="n">make_basic_plots</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span>
+                                <span class="n">time_invervall</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="n">start_hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">duration_hours</span><span class="o">=</span><span class="mi">167</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This generates and saves the following figures to the <code class="docutils literal notranslate"><span class="pre">plots</span></code> folder:</p>
+<ul class="simple">
+<li><p><strong>Investment decisions</strong>: Shows connected clusters, built pipes, and invested capacities.</p></li>
+<li><p><strong>Annual energy balance</strong>: Overview of energy contributions by technology.</p></li>
+<li><p><strong>Time-resolved energy balance</strong>: Hourly (or weekly/monthly) profiles of heat demand and supply.</p></li>
+</ul>
+<p>You can adjust:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">time_invervall</span></code>: 'H' (hourly), 'D' (daily), 'W' (weekly), or 'M' (monthly)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">start_hour</span></code> and <code class="docutils literal notranslate"><span class="pre">duration_hours</span></code>: Time window for zooming into specific periods.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structparam.html" class="btn btn-neutral float-left" title="Project Structure and Settings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules/index.html" class="btn btn-neutral float-right" title="Modules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

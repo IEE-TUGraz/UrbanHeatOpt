@@ -1,0 +1,668 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>clustering &mdash; UrbanHeatOpt 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=40be6288"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs"></script>
+      <script type="module" src="https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";import elkLayouts from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0.1.4/dist/mermaid-layout-elk.esm.min.mjs";mermaid.registerLayoutLoaders(elkLayouts);mermaid.initialize({startOnLoad:false});</script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">
+import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.2.0/dist/mermaid.esm.min.mjs";
+window.addEventListener("load", () => mermaid.run());
+</script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            UrbanHeatOpt
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../structparam.html">Project Structure and Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../runcasestudy.html">Run a Case Study</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/index.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">UrbanHeatOpt</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">clustering</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for clustering</h1><div class="highlight"><pre>
+<span></span><span class="c1"># this script contains all functions used for clustering of the data and preparing the data for the optimisation model</span>
+
+<span class="c1"># import libraries</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">termcolor</span><span class="w"> </span><span class="kn">import</span> <span class="n">cprint</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">Delaunay</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">networkx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nx</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyproj</span><span class="w"> </span><span class="kn">import</span> <span class="n">CRS</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">data</span>
+
+<div class="viewcode-block" id="read_geo_data_from_disk">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.read_geo_data_from_disk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_geo_data_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the building data for a given casestudy from the disk and return a geodataframe.</span>
+
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    :return: geodataframe with building data</span>
+<span class="sd">    :rtype: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># load the data for buildings and drop nan values</span>
+    <span class="c1"># input: path_building_data: path to the .geojson file with the building data</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: load building for case study: &quot;</span> <span class="o">+</span> <span class="n">case_study_name</span><span class="p">)</span>
+
+    <span class="n">path_buildings_gdf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;building_data&#39;</span><span class="p">][</span><span class="s1">&#39;buildings_gdf&#39;</span><span class="p">])</span>
+
+    <span class="n">gdf_building_data</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path_buildings_gdf</span><span class="p">)</span>
+
+    <span class="c1"># remove the entries with missing data</span>
+    <span class="n">gdf_building_data</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+    <span class="n">gdf_building_data</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3857</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load building data&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_building_data</span></div>
+
+
+
+<div class="viewcode-block" id="read_heatGenUnits_from_disk">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.read_heatGenUnits_from_disk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_heatGenUnits_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the heat generation units for a given casestudy from the disk and return a geodataframe.</span>
+
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param scenario_name: name of the scenario</span>
+<span class="sd">    :type scenario_name: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    :return: geodataframe with heat generation units</span>
+<span class="sd">    :rtype: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#load heat generation units</span>
+   
+    <span class="n">path_heatGenUnits</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;heat_source_data&#39;</span><span class="p">][</span><span class="s1">&#39;root_dir&#39;</span><span class="p">])</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: load heat generation units from: &quot;</span> <span class="o">+</span> <span class="n">path_heatGenUnits</span><span class="p">)</span>
+    <span class="n">df_heat_gen</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_heatGenUnits</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;heat_source_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_sources&#39;</span><span class="p">]),</span> <span class="n">skiprows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># add an id to the heat gen units</span>
+    <span class="c1">#df_heat_gen[&#39;heat_unit_id&#39;] = &#39;heat_unit_&#39; + df_heat_gen.index.astype(str)</span>
+
+    <span class="n">gdf_heat_gen</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df_heat_gen</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">gpd</span><span class="o">.</span><span class="n">points_from_xy</span><span class="p">(</span><span class="n">df_heat_gen</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="n">df_heat_gen</span><span class="o">.</span><span class="n">lat</span><span class="p">))</span>
+    <span class="n">gdf_heat_gen</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s1">&#39;EPSG:4326&#39;</span><span class="p">)</span>
+    <span class="n">gdf_heat_gen</span> <span class="o">=</span> <span class="n">gdf_heat_gen</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3857</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load heat generation units&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_heat_gen</span></div>
+
+
+<div class="viewcode-block" id="read_wasteHeatProfiles_from_disk">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.read_wasteHeatProfiles_from_disk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_wasteHeatProfiles_from_disk</span><span class="p">(</span><span class="n">gdf_heat_gen</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the waste heat profiles for a given casestudy from the disk and return a dataframe.</span>
+
+<span class="sd">    :param gdf_heat_gen: geodataframe with heat generation units</span>
+<span class="sd">    :type gdf_heat_gen: gpd.GeoDataFrame</span>
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param scenario_name: name of the scenario</span>
+<span class="sd">    :type scenario_name: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    :return: dataframe with waste heat profiles of the heat generation units</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path_heatGenUnits</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;heat_source_data&#39;</span><span class="p">][</span><span class="s1">&#39;root_dir&#39;</span><span class="p">])</span>
+    <span class="n">df_waste_heat_profiles</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_heatGenUnits</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;heat_source_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_profiles&#39;</span><span class="p">]),</span> <span class="n">skiprows</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">WHunits</span> <span class="o">=</span> <span class="n">gdf_heat_gen</span><span class="p">[</span><span class="n">gdf_heat_gen</span><span class="p">[</span><span class="s1">&#39;isWH&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="n">WHunits</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">unit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_waste_heat_profiles</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">cprint</span><span class="p">((</span><span class="s1">&#39;Warning: No wast heat profile found for unit: &#39;</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span> <span class="p">,</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: load waste heat profiles&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df_waste_heat_profiles</span></div>
+
+
+<div class="viewcode-block" id="read_building_TS_from_disk">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.read_building_TS_from_disk">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_building_TS_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read the building heat demand time series for a given casestudy from the disk and return a dataframe.</span>
+
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    :return: dataframe with building heat demand time series of the buildings</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path_building_TS</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;building_data&#39;</span><span class="p">][</span><span class="s1">&#39;building_TS&#39;</span><span class="p">])</span>
+    <span class="n">df_builidng_TS</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_building_TS</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span>  <span class="n">df_builidng_TS</span></div>
+
+
+
+<div class="viewcode-block" id="get_centroids">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.get_centroids">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_centroids</span><span class="p">(</span><span class="n">gdf_building_data</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the centroids of the buildings and add them to the geodataframe.</span>
+
+<span class="sd">    :param gdf_building_data: geodataframe with building data, must contain a geometry column </span>
+<span class="sd">    :type gdf_building_data: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># calculate the centroids of the buildings</span>
+    <span class="c1"># input: gdf_building_data: geodataframe with building data</span>
+    <span class="c1"># output: gdf_building_data: geodataframe with building data and centroids</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: calculate centroids&quot;</span><span class="p">)</span>
+
+    <span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: calculate centroids&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cluster_buildings">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.cluster_buildings">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cluster_buildings</span><span class="p">(</span><span class="n">gdf_building_data</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cluster the buildings into clusters based on their location and aggregate/calculate properties for each cluster.</span>
+
+<span class="sd">    This implementation uses KMeans clustering to group buildings into clusters based on their geographical coordinates. </span>
+<span class="sd">    A different clustering method can be used if needed.</span>
+
+<span class="sd">    :param gdf_building_data: geodataframe with building data, must contain a centroid column</span>
+<span class="sd">    :type gdf_building_data: gpd.GeoDataFrame</span>
+<span class="sd">    :param cost_parameter: dictionary with cost parameters for the clustering</span>
+<span class="sd">    :type cost_parameter: dict</span>
+<span class="sd">    :return: geodataframe with data for each cluster for subsequent analysis</span>
+<span class="sd">    :rtype: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># cluster the buildings intou para_cluster_size number of clusters based on location</span>
+    <span class="c1"># input: gdf_building_data: geodataframe with building data</span>
+    <span class="c1">#        parm_cluster_size: number of clusters to be formed</span>
+    <span class="c1"># output: gdf_clustered_buildings: geodataframe with data for each cluster, in 2D projection</span>
+
+    <span class="c1"># load the costs and parameter from the corresponding file</span>
+    <span class="n">parm_cluster_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cost_parameter</span><span class="p">[</span><span class="s1">&#39;param_cluster_size&#39;</span><span class="p">])</span>  
+    <span class="n">cost_DH_connect_building</span> <span class="o">=</span> <span class="n">cost_parameter</span><span class="p">[</span><span class="s1">&#39;cost_DH_connect_building&#39;</span><span class="p">]</span>
+    <span class="n">cost_DH_connect_area</span> <span class="o">=</span> <span class="n">cost_parameter</span><span class="p">[</span><span class="s1">&#39;cost_DH_connect_area&#39;</span><span class="p">]</span>
+    <span class="n">cost_DH_connect_power</span> <span class="o">=</span> <span class="n">cost_parameter</span><span class="p">[</span><span class="s1">&#39;cost_DH_connect_power&#39;</span><span class="p">]</span>  
+
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: cluster buildings into &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">parm_cluster_size</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; clusters&quot;</span><span class="p">)</span>
+
+    <span class="c1"># calculate the kmeans clustering</span>
+    <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="n">parm_cluster_size</span><span class="p">)</span>
+    <span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;cluster&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;centroid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">y</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+    <span class="c1"># calculate the yearly heating costs per building</span>
+    <span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;YearlyHeatingCosts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">gdf_building_data</span><span class="p">[</span><span class="s1">&#39;LocalHeatProdCosts&#39;</span><span class="p">]</span> 
+
+    <span class="c1"># copy required data to sum up to a new geodataframe </span>
+    <span class="n">df_clustered_buildings</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="p">[[</span><span class="s1">&#39;cluster&#39;</span><span class="p">,</span><span class="s1">&#39;MaxDemand&#39;</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCap&#39;</span><span class="p">,</span><span class="s1">&#39;GeneralisedThermCond&#39;</span><span class="p">,</span><span class="s1">&#39;YearlyHeatingCosts&#39;</span><span class="p">,</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">,</span><span class="s1">&#39;heated_area&#39;</span><span class="p">,</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="c1">#df_clustered_buildings.drop(columns=[&#39;geometry&#39;,&#39;centroid&#39;,&#39;building_id&#39;,&#39;year_of_construction&#39;, &#39;building_primary&#39;,&#39;building_secondary&#39;,&#39;building_category&#39; ], inplace=True) # streetname as column not included in clustering</span>
+
+  
+    <span class="c1"># calculate the sum for each cluster</span>
+    <span class="n">df_clustered_buildings</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;cluster&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># overwrite the columns that are not sums</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;cluster&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">centroid</span>
+
+    <span class="c1"># calculate the convex hull for each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;convex_hull&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">dissolve</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;cluster&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">convex_hull</span>
+
+    <span class="c1"># calculate the bounding box for each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;district_area&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;convex_hull&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+
+    <span class="c1"># convert the convex hull to a polygon in wkt to have only one geometry column</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;convex_hull&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;convex_hull&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">wkt</span><span class="p">)</span>
+   
+    <span class="c1"># add the number of buildings in each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;NumOfBuildings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;cluster&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+
+    <span class="c1"># calculated weighted average costs for the local heating production</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;LocalHeatProdCost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyHeatingCosts&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;YearlyDemand&#39;</span><span class="p">]</span>
+    <span class="c1">#df_clustered_buildings.drop(columns=[&#39;YearlyHeatingCosts&#39;], inplace=True)</span>
+
+    <span class="c1"># create a list with the building_ids for each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;building_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdf_building_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;cluster&#39;</span><span class="p">)[</span><span class="s1">&#39;building_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="c1"># add an id for the clusters</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;heat_node_&#39;</span> <span class="o">+</span> <span class="n">df_clustered_buildings</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="c1"># calculate the maxDHPower for each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;maxDHPower&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;MaxDemand&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mf">1.1</span>
+
+    <span class="c1"># calculate the DH connection costs for each cluster</span>
+    <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;CostsDHconnect&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;NumOfBuildings&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cost_DH_connect_building</span> <span class="o">+</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;district_area&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cost_DH_connect_area</span> <span class="o">+</span> <span class="n">df_clustered_buildings</span><span class="p">[</span><span class="s1">&#39;maxDHPower&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">cost_DH_connect_power</span>  
+
+    <span class="c1"># convert the data to geodataframe</span>
+    <span class="n">gdf_clustered_buildings</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df_clustered_buildings</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">)</span>
+    <span class="n">gdf_clustered_buildings</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: cluster buildings&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_clustered_buildings</span></div>
+
+
+
+<div class="viewcode-block" id="merge_heatGenUnits">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.merge_heatGenUnits">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_heatGenUnits</span><span class="p">(</span><span class="n">gdf_clustered_buildings</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf_heatGenUnits</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge the data for the heat generation units with the data for the clusters of buildings.</span>
+
+<span class="sd">    :param gdf_clustered_buildings: geodataframe with data for each building cluster</span>
+<span class="sd">    :type gdf_clustered_buildings: gpd.GeoDataFrame</span>
+<span class="sd">    :param gdf_heatGenUnits: geodataframe with data for the heat generation units</span>
+<span class="sd">    :type gdf_heatGenUnits: gpd.GeoDataFrame</span>
+<span class="sd">    :return: geodataframe with data for each cluster and the heat generation units </span>
+<span class="sd">    :rtype: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># merge the data for the heat generation units with the data for the clusters of buildings</span>
+    <span class="c1"># input: gdf_clustered_buildings: geodataframe with data for each cluster</span>
+    <span class="c1">#        gdf_heatGenUnits: geodataframe with data for the heat generation units</span>
+    <span class="c1"># output: gdf_clustered_buildings: geodataframe with data for each cluster and the heat generation units</span>
+
+    <span class="n">gdf_heatGenUnits</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;heat_unit_&#39;</span> <span class="o">+</span> <span class="n">gdf_heatGenUnits</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+   
+    <span class="n">gdf_heat_nodes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">gdf_clustered_buildings</span><span class="p">,</span> <span class="n">gdf_heatGenUnits</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">,</span><span class="s1">&#39;geometry&#39;</span><span class="p">]]],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: merge heat generation units&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_heat_nodes</span></div>
+
+
+
+<div class="viewcode-block" id="cluster_heat_demand">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.cluster_heat_demand">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cluster_heat_demand</span><span class="p">(</span><span class="n">gdf_allheatnodes</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">df_building_TS</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cluster the heat demand time series of the buildings into clusters based on the spatial clustering of the buildings.</span>
+
+<span class="sd">    :param gdf_allheatnodes: geodataframe with data for each cluster and the heat generation units</span>
+<span class="sd">    :type gdf_allheatnodes: gpd.GeoDataFrame</span>
+<span class="sd">    :param df_building_TS: dataframe with heat demand time series of the buildings</span>
+<span class="sd">    :type df_building_TS: pd.DataFrame</span>
+<span class="sd">    :return: dataframe with heat demand time series of the clusters</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># sum up the heating demand time series of the buildings by the calculated clusters</span>
+    
+    <span class="n">df_cluster_TS</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">df_cluster_TS</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_building_TS</span><span class="p">[</span><span class="s1">&#39;hour&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">cluster_id</span> <span class="ow">in</span> <span class="n">gdf_allheatnodes</span><span class="o">.</span><span class="n">cluster_id</span><span class="p">:</span>
+        <span class="n">df_cluster_TS</span><span class="p">[</span><span class="n">cluster_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Placeholder for actual data</span>
+        <span class="n">temp_building_ids</span> <span class="o">=</span> <span class="n">gdf_allheatnodes</span><span class="p">[</span><span class="n">gdf_allheatnodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cluster_id</span><span class="p">][</span><span class="s1">&#39;building_id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">temp_building_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">:</span>
+            <span class="n">df_cluster_TS</span><span class="p">[</span><span class="n">cluster_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_building_TS</span><span class="p">[</span><span class="n">temp_building_ids</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">1e3</span>  <span class="c1"># the data comes in Wh, to convert to kWh, divide by 1000</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_cluster_TS</span><span class="p">[</span><span class="n">cluster_id</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  
+    
+    <span class="k">return</span> <span class="n">df_cluster_TS</span></div>
+
+
+
+<div class="viewcode-block" id="propose_network">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.propose_network">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">propose_network</span><span class="p">(</span><span class="n">gdf_heat_nodes</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Propose a network of heat pipes between the clusters of building clusters.</span>
+<span class="sd">     </span>
+<span class="sd">    The network is based on the delaunay triangulation and minimum spanning tree.</span>
+<span class="sd">    A different network generation method can be used if needed.</span>
+
+<span class="sd">    :param gdf_heat_nodes: geodataframe with data for each cluster</span>
+<span class="sd">    :type gdf_heat_nodes: gpd.GeoDataFrame</span>
+<span class="sd">    :return: geodataframe with data for the network</span>
+<span class="sd">    :rtype: gpd.GeoDataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># propose a network of heat pipes between the clusters of buildings based on the delaunay triangulation and minimum spanning tree   </span>
+    <span class="c1"># input: gdf_clustered_buildings: geodataframe with data for each cluster</span>
+    <span class="c1"># output: gdf_network: geodataframe with data for the network</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: routing a network between the clusters&quot;</span><span class="p">)</span>
+
+    <span class="c1"># calculate the delaunay triangulation</span>
+    <span class="n">tri</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+    <span class="c1"># create a dictionary with the node id and index</span>
+    <span class="n">node_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">idx</span><span class="p">:</span> <span class="n">node</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">])}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_edge_distance</span><span class="p">(</span><span class="n">node_from</span><span class="p">,</span><span class="n">node_to</span><span class="p">):</span>
+        <span class="n">point_from</span> <span class="o">=</span> <span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">node_from</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span>
+        <span class="n">point_to</span> <span class="o">=</span> <span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">node_to</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span>
+
+        <span class="c1">#calculate the distance between the points</span>
+        <span class="n">distance</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">point_from</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">point_to</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">distance</span>
+
+    <span class="c1"># create a graph from the delaunay triangulation</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+    <span class="c1"># add the nodes to the graph</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">])</span>
+
+    <span class="c1"># add the edges to the graph</span>
+    <span class="k">for</span> <span class="n">simplex</span> <span class="ow">in</span> <span class="n">tri</span><span class="o">.</span><span class="n">simplices</span><span class="p">:</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">weight</span><span class="o">=</span><span class="n">get_edge_distance</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">1</span><span class="p">]]))</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">weight</span><span class="o">=</span><span class="n">get_edge_distance</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">2</span><span class="p">]]))</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> <span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">weight</span><span class="o">=</span><span class="n">get_edge_distance</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span><span class="n">node_dict</span><span class="p">[</span><span class="n">simplex</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span>
+
+    <span class="c1"># calculate the minimum spanning tree</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">minimum_spanning_tree</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+    <span class="c1"># convert the graph to a geodataframe</span>
+    <span class="n">df_edges</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node_from&#39;</span><span class="p">,</span><span class="s1">&#39;node_to&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+
+    <span class="c1"># add the geometry to the dataframe</span>
+    <span class="n">df_edges</span><span class="p">[</span><span class="s1">&#39;geometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_edges</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">LineString</span><span class="p">([</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;node_from&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="n">gdf_heat_nodes</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;node_to&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># add a column with the distance of the edge</span>
+    <span class="n">df_edges</span><span class="p">[</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_edges</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;weight&#39;</span><span class="p">])</span>
+
+    <span class="c1"># add the reversed geometry of all edges (needed for the opt model)</span>
+    <span class="n">df_reversed_edges</span> <span class="o">=</span> <span class="n">df_edges</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df_reversed_edges</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;node_to&#39;</span><span class="p">,</span><span class="s1">&#39;node_from&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;geometry&#39;</span><span class="p">,</span><span class="s1">&#39;distance&#39;</span><span class="p">]</span>
+    
+    <span class="n">df_heat_network</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_edges</span><span class="p">,</span> <span class="n">df_reversed_edges</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># delete duplicate edges</span>
+    <span class="n">df_heat_network</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node_from&#39;</span><span class="p">,</span><span class="s1">&#39;node_to&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># add a line id </span>
+    <span class="n">df_heat_network</span><span class="p">[</span><span class="s1">&#39;pipe_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;pipe_&#39;</span> <span class="o">+</span> <span class="n">df_heat_network</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="c1"># change to geodataframe</span>
+    <span class="n">gdf_heat_network</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">df_heat_network</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="s1">&#39;geometry&#39;</span><span class="p">)</span>
+    <span class="n">gdf_heat_network</span><span class="o">.</span><span class="n">crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="p">(</span><span class="s1">&#39;EPSG:3857&#39;</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: propose network&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gdf_heat_network</span></div>
+
+
+
+<div class="viewcode-block" id="save_data">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.save_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_data</span><span class="p">(</span><span class="n">gdf_heat_nodes</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">df_cluster_TS</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">gdf_heat_network</span><span class="p">:</span><span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">gdf_heat_gen</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span><span class="n">df_waste_heat_profiles</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save the data in the format for the optimisation model to the scenario folder.</span>
+
+<span class="sd">    :param gdf_heat_nodes: geodataframe with data for each cluster</span>
+<span class="sd">    :type gdf_heat_nodes: gpd.GeoDataFrame</span>
+<span class="sd">    :param df_cluster_TS: dataframe with heat demand time series of the clusters</span>
+<span class="sd">    :type df_cluster_TS: pd.DataFrame</span>
+<span class="sd">    :param gdf_heat_network: geodataframe with data for the network</span>
+<span class="sd">    :type gdf_heat_network: gpd.GeoDataFrame</span>
+<span class="sd">    :param gdf_heat_gen: geodataframe with data for the heat generation units</span>
+<span class="sd">    :type gdf_heat_gen: gpd.GeoDataFrame</span>
+<span class="sd">    :param df_waste_heat_profiles: dataframe with waste heat profiles of the heat generation units</span>
+<span class="sd">    :type df_waste_heat_profiles: pd.DataFrame</span>
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param scenario_name: name of the scenario</span>
+<span class="sd">    :type scenario_name: str</span>
+<span class="sd">    :param config: configuration dictionary</span>
+<span class="sd">    :type config: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">model_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;scenario_dir&#39;</span><span class="p">],</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;data_dir&#39;</span><span class="p">],</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;root_dir&#39;</span><span class="p">])</span>
+    
+    <span class="c1"># ckeck if the path exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">)</span>
+            
+    <span class="c1"># save the data for the optimisation model</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: save data for the optimisation model to: &quot;</span>  <span class="o">+</span> <span class="n">model_data_path</span><span class="p">)</span>
+    <span class="n">gdf_heat_nodes</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_nodes&#39;</span><span class="p">]),</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;GeoJSON&#39;</span><span class="p">)</span>
+    <span class="n">df_cluster_TS</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_dem&#39;</span><span class="p">]),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">gdf_heat_network</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_network&#39;</span><span class="p">]),</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;GeoJSON&#39;</span><span class="p">)</span>
+    <span class="n">gdf_heat_gen</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">:</span><span class="s1">&#39;heat_unit_id&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># rename the column to unit_id for more clearity in the optimization model</span>
+    <span class="n">gdf_heat_gen</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;heat_gen_units&#39;</span><span class="p">]),</span> <span class="n">driver</span><span class="o">=</span><span class="s1">&#39;GeoJSON&#39;</span><span class="p">)</span>
+    <span class="n">df_waste_heat_profiles</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">model_data_path</span><span class="p">,</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;model_data&#39;</span><span class="p">][</span><span class="s1">&#39;wh_profiles&#39;</span><span class="p">]),</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: save data for the optimisation model&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_hot_water_demand">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.add_hot_water_demand">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_hot_water_demand</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">:</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">cluster_TS</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a simplified hot water demand to the heat demand time series.</span>
+
+<span class="sd">    This function adds a simplified hot water demand to the heat demand time series of the buildings. </span>
+<span class="sd">    The hot water demand is equally distributed over the year and is calculated based on the number of dwellings in each cluster.</span>
+<span class="sd">    The hot water demand is added to the existing heat demand time series.</span>
+
+<span class="sd">    :param building_cluster: geodataframe with data for each cluster</span>
+<span class="sd">    :type building_cluster: gpd.GeoDataFrame</span>
+<span class="sd">    :param cluster_TS: dataframe with heat demand time series of the clusters</span>
+<span class="sd">    :type cluster_TS: pd.DataFrame</span>
+<span class="sd">    :param cost_parameter: dictionary with cost parameters for the clustering</span>
+<span class="sd">    :type cost_parameter: dict</span>
+<span class="sd">    :return: dataframe with heat demand time serieswith added hot water demand in the same  time series</span>
+<span class="sd">    :rtype: pd.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># add a simplified hot water demand to the heat demand time series</span>
+    <span class="c1"># input: building_cluster: geodataframe with data for each cluster</span>
+    <span class="c1">#        cluster_TS: dataframe with the heat demand time series</span>
+    <span class="c1"># output: cluster_TS: dataframe with the heat demand time series and the hot water demand</span>
+
+    <span class="c1"># load the costs and parameter from the corresponding file</span>
+    <span class="n">hot_water_demand</span> <span class="o">=</span> <span class="n">cost_parameter</span><span class="p">[</span><span class="s1">&#39;daily_hot_water_demand&#39;</span><span class="p">]</span> <span class="c1">#hot water demand per dwelling per day</span>
+
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Start: add hot water demand to the heat demand time series&quot;</span><span class="p">)</span>
+
+    <span class="c1"># calculate the hot water demand for each cluster</span>
+    <span class="n">building_cluster</span><span class="p">[</span><span class="s1">&#39;YearlyHWD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hot_water_demand</span> <span class="o">*</span> <span class="n">building_cluster</span><span class="p">[</span><span class="s1">&#39;number_of_dwellings&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">356</span>
+
+    <span class="c1"># distribute the yearlyHWD to the hourly demand and add it to the existing heat demand</span>
+    <span class="k">for</span> <span class="n">cluster_id</span> <span class="ow">in</span> <span class="n">cluster_TS</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">cluster_TS</span><span class="p">[</span><span class="n">cluster_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">cluster_TS</span><span class="p">[</span><span class="n">cluster_id</span><span class="p">]</span> <span class="o">+</span> <span class="n">building_cluster</span><span class="p">[</span><span class="n">building_cluster</span><span class="p">[</span><span class="s1">&#39;cluster_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">cluster_id</span><span class="p">][</span><span class="s1">&#39;YearlyHWD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">8760</span>
+   
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: add hot water demand&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cluster_TS</span></div>
+
+
+
+<div class="viewcode-block" id="perform_complete_clustering">
+<a class="viewcode-back" href="../modules/clustering.html#clustering.perform_complete_clustering">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">perform_complete_clustering</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform the complete clustering process and save the data for the optimisation model.</span>
+
+<span class="sd">    :param case_study_name: name of the case study</span>
+<span class="sd">    :type case_study_name: str</span>
+<span class="sd">    :param scenario_name: name of the scenario</span>
+<span class="sd">    :type scenario_name: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># load the general config file</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+    <span class="c1"># generate a new scenario if the scenario does not exist</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">generate_new_scenario</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span><span class="n">scenario_name</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># prepre the parameter file</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">prepare_parameter_file</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># load prameter and costs as dictionary</span>
+    <span class="n">cost_parameter</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_cost_parameter</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># load the required data sets</span>
+    <span class="n">buildings</span> <span class="o">=</span> <span class="n">read_geo_data_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">buildings_TS</span> <span class="o">=</span> <span class="n">read_building_TS_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">generation_units</span> <span class="o">=</span> <span class="n">read_heatGenUnits_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">waste_heat_profiles</span> <span class="o">=</span> <span class="n">read_wasteHeatProfiles_from_disk</span><span class="p">(</span><span class="n">generation_units</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    
+    <span class="c1"># cluster the buidlings </span>
+    <span class="n">get_centroids</span><span class="p">(</span><span class="n">buildings</span><span class="p">)</span> <span class="c1"># calculate the centroids of the buildings</span>
+    <span class="n">building_cluster</span> <span class="o">=</span> <span class="n">cluster_buildings</span><span class="p">(</span><span class="n">buildings</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">)</span>
+
+    <span class="c1"># cluster the heat demand time series</span>
+    <span class="n">cluster_TS</span> <span class="o">=</span> <span class="n">cluster_heat_demand</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">buildings_TS</span><span class="p">)</span>
+
+    <span class="c1"># add hot water demand to the heat demand time series</span>
+    <span class="n">cluster_TS</span> <span class="o">=</span> <span class="n">add_hot_water_demand</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">cluster_TS</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">)</span>
+
+    <span class="c1"># merge clusters with generion units</span>
+    <span class="n">all_heat_nodes</span> <span class="o">=</span> <span class="n">merge_heatGenUnits</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">generation_units</span><span class="p">)</span>
+
+    <span class="c1"># create a network</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">propose_network</span><span class="p">(</span><span class="n">all_heat_nodes</span><span class="p">)</span>
+
+    <span class="c1"># save the data to the scenario folder for the optimisation model</span>
+    <span class="n">save_data</span><span class="p">(</span><span class="n">all_heat_nodes</span><span class="p">,</span><span class="n">cluster_TS</span><span class="p">,</span><span class="n">network</span><span class="p">,</span><span class="n">generation_units</span><span class="p">,</span><span class="n">waste_heat_profiles</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">,</span> <span class="n">scenario_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: clustering and preparing data for the optimisation model&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># run the whole script</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+    <span class="c1"># set here the case study and scenario name</span>
+    <span class="n">case_study_name</span> <span class="o">=</span> <span class="s1">&#39;Puertollano_open_data&#39;</span>
+    <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;realistic_costs&#39;</span>
+
+    <span class="c1"># load the general config file</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_config</span><span class="p">()</span>
+
+    <span class="c1"># generate a new scenario if the scenario does not exist</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">generate_new_scenario</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span><span class="n">model_name</span><span class="p">,</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># prepre the parameter file</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">prepare_parameter_file</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># load prameter and costs as dictionary</span>
+    <span class="n">cost_parameter</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">load_cost_parameter</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># load the required data sets</span>
+    <span class="n">buildings</span> <span class="o">=</span> <span class="n">read_geo_data_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">buildings_TS</span> <span class="o">=</span> <span class="n">read_building_TS_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">generation_units</span> <span class="o">=</span> <span class="n">read_heatGenUnits_from_disk</span><span class="p">(</span><span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">waste_heat_profiles</span> <span class="o">=</span> <span class="n">read_wasteHeatProfiles_from_disk</span><span class="p">(</span><span class="n">generation_units</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    
+    <span class="c1"># cluster the buidlings </span>
+    <span class="n">get_centroids</span><span class="p">(</span><span class="n">buildings</span><span class="p">)</span> <span class="c1"># calculate the centroids of the buildings</span>
+    <span class="n">building_cluster</span> <span class="o">=</span> <span class="n">cluster_buildings</span><span class="p">(</span><span class="n">buildings</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">)</span>
+
+    <span class="c1"># cluster the heat demand time series</span>
+    <span class="n">cluster_TS</span> <span class="o">=</span> <span class="n">cluster_heat_demand</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">buildings_TS</span><span class="p">)</span>
+
+    <span class="c1"># add hot water demand to the heat demand time series</span>
+    <span class="n">cluster_TS</span> <span class="o">=</span> <span class="n">add_hot_water_demand</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">cluster_TS</span><span class="p">,</span> <span class="n">cost_parameter</span><span class="p">)</span>
+
+    <span class="c1"># merge clusters with generion units</span>
+    <span class="n">all_heat_nodes</span> <span class="o">=</span> <span class="n">merge_heatGenUnits</span><span class="p">(</span><span class="n">building_cluster</span><span class="p">,</span> <span class="n">generation_units</span><span class="p">)</span>
+
+    <span class="c1"># create a network</span>
+    <span class="n">network</span> <span class="o">=</span> <span class="n">propose_network</span><span class="p">(</span><span class="n">all_heat_nodes</span><span class="p">)</span>
+
+    <span class="c1"># save the data to the scenario folder for the optimisation model</span>
+    <span class="n">save_data</span><span class="p">(</span><span class="n">all_heat_nodes</span><span class="p">,</span><span class="n">cluster_TS</span><span class="p">,</span><span class="n">network</span><span class="p">,</span><span class="n">generation_units</span><span class="p">,</span><span class="n">waste_heat_profiles</span><span class="p">,</span> <span class="n">case_study_name</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Elapsed time: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">elapsed</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; seconds&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+    <span class="n">cprint</span><span class="p">(</span><span class="s2">&quot;Done: clustering and preparing data for the optimisation model&quot;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Simon Malacek, David Cardona, Jose Portela.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
