@@ -26,7 +26,7 @@ Using the software does not require expert programming knowledge.
 1. **Clone this repository** to your working directory.
 2. **Activate the environment**:
    - Recommended: run `activate_environment_windows.bat` (windows) or `activate_environment_unix.sh` (Unix)
-   - Alternatively (Anaconda must be installed before):
+   - Alternatively (Anaconda must be installed before, using Anaconda Promt can be helpful):
      ```bash
      conda env create -f environment.yaml
      conda activate urbanheatopt_env
