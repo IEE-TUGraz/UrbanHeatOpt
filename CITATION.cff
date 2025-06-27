@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Malacek"
+  given-names: "Simon"
+  orcid: "https://orcid.org/0009-0006-4943-7600"
+- family-names: "Cardona Vásquez"
+  given-names: "David"
+  orcid: "https://orcid.org/0000-0002-3924-2096"
+- family-names: "Portela"
+  given-names: "José"
+  orcid: "https://orcid.org/0000-0002-7839-8982"
+title: "UrbanHeatOpt: A Software Framework for Supporting Municipal Heat Transition Planning"
+version: 1.0.0
+date-released: 2025-06-26
+url: "https://github.com/IEE-TUGraz/UrbanHeatOpt"
