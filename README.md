@@ -28,7 +28,7 @@ Using the software does not require expert programming knowledge.
    - Recommended: run `activate_environment_windows.bat` (windows) or `activate_environment_unix.sh` (Unix)
    - Alternatively (Anaconda must be installed before, using Anaconda Promt can be helpful):
      ```bash
-     conda env create -f environment.yaml
+     conda env create -f environment.yml
      conda activate urbanheatopt_env
      ```
 3. **Open the `main.ipynb` notebook** in a Jupyter-compatible environment.
