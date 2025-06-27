@@ -25,13 +25,13 @@ Using the software does not require expert programming knowledge.
 
 1. **Clone this repository** to your working directory.
 2. **Activate the environment**:
-   - Recommended (Windows): run `activate_environment_windows.bat`
-   - Alternatively (all systems):
+   - Recommended: run `activate_environment_windows.bat` (windows) or `activate_environment_unix.sh` (Unix)
+   - Alternatively (Anaconda must be installed before):
      ```bash
      conda env create -f environment.yaml
      conda activate urbanheatopt_env
      ```
-3. **Run the `main.ipynb` notebook** in JupyterLab or another Jupyter-compatible environment.
+3. **Open the `main.ipynb` notebook** in a Jupyter-compatible environment.
 4. Follow the notebook instructions to:
    - Prepare or modify a case study
    - Generate input data
