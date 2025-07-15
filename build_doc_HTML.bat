@@ -14,5 +14,5 @@ cd ..
 REM Create .nojekyll file to prevent GitHub Pages from ignoring static files
 echo.> docs\.nojekyll
 
-echo Documentation built and copied to 'docs' — ready for GitHub Pages.
+echo Documentation built in 'docs' — ready for GitHub Pages.
 pause
