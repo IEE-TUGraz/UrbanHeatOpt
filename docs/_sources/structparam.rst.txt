@@ -120,7 +120,7 @@ This file contains:
 
 Used to generate time-dependent occupancy and heating profiles.
 
-- Tip: Data can be sourced from Renewables Ninja [Renewables.ninja]_..
+- Tip: Data can be sourced from Renewables Ninja [Renewables.ninja]_.
 
 Solar Gain
 ~~~~~~~~~~
@@ -167,7 +167,7 @@ Each row represents a waste heat unit with the following columns:
 - ``O&M and Fuel Costs``: €/kWh (already efficiency-adjusted)
 - ``Power Investment Costs``: €/kW (annualized)
 - ``Storage Investment Costs``: €/m³ (only for TES)
-- ``Storage loss rate %/h``: Only for TES
+- ``Storage loss rate``: %/h (only for TES)
 
 Waste Heat Profiles
 ~~~~~~~~~~~~~~~~~~~
@@ -553,7 +553,7 @@ The mass flow injection to the network equals the sum of all generation unit mas
 
 **Local Production Exclusion (No Double Heating)**
 
-If no double heating is allowed ($\delta^{DoubH} = 0$) all nodes which are connected to the district heating network cannot provide local heating anymore. 
+If no double heating is allowed (:math:`\delta^{DoubH} = 0`) all nodes which are connected to the district heating network cannot provide local heating anymore. 
 
 .. math::
 

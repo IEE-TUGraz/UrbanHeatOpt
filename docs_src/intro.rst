@@ -22,7 +22,7 @@ General Framework
 The tool is structured into four modular components:
 
 1. **Prepare geodata**  
-   Accesses building geometry and attributes from OpenStreetMap (OS and estimates annual heating demands based on building typologies.
+   Accesses building geometry and attributes from OpenStreetMap (OSM) and estimates annual heating demands based on building typologies.
 
 2. **Generate heat demand time series**  
    Calculates dynamic heat demand profiles through thermal modeling combined with active occupancy simulations.

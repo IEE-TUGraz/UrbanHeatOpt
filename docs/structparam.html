@@ -9,6 +9,8 @@
   <title>Project Structure and Settings &mdash; UrbanHeatOpt 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Lato:400,700&display=swap" />
+      <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
@@ -88,7 +90,7 @@
       </nav>
 
       <div class="wy-nav-content">
-        <div class="rst-content">
+        <div class="rst-content style-external-links">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
@@ -202,7 +204,7 @@ You should adjust these values for your specific region and climate zone.</p>
 </ul>
 <p>Used to generate time-dependent occupancy and heating profiles.</p>
 <ul class="simple">
-<li><p>Tip: Data can be sourced from Renewables Ninja <a class="reference internal" href="#renewables-ninja" id="id2"><span>[Renewables.ninja]</span></a>..</p></li>
+<li><p>Tip: Data can be sourced from Renewables Ninja <a class="reference internal" href="#renewables-ninja" id="id2"><span>[Renewables.ninja]</span></a>.</p></li>
 </ul>
 </section>
 <section id="solar-gain">
@@ -246,7 +248,7 @@ You should adjust these values for your specific region and climate zone.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">O&amp;M</span> <span class="pre">and</span> <span class="pre">Fuel</span> <span class="pre">Costs</span></code>: €/kWh (already efficiency-adjusted)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Power</span> <span class="pre">Investment</span> <span class="pre">Costs</span></code>: €/kW (annualized)</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Storage</span> <span class="pre">Investment</span> <span class="pre">Costs</span></code>: €/m³ (only for TES)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Storage</span> <span class="pre">loss</span> <span class="pre">rate</span> <span class="pre">%/h</span></code>: Only for TES</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Storage</span> <span class="pre">loss</span> <span class="pre">rate</span></code>: %/h (only for TES)</p></li>
 </ul>
 </section>
 <section id="waste-heat-profiles">
@@ -700,7 +702,7 @@ z^{\text{DH}}_n \cdot \frac{P^{\max}_n}{(T^{\text{sup}} - T^{\text{ret}}) \cdot 
 \sum_{hgn(tes,n)} \frac{q^{\text{centr}}_{tes,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
 \quad \forall n,h\end{split}\]</div>
 <p><strong>Local Production Exclusion (No Double Heating)</strong></p>
-<p>If no double heating is allowed ($delta^{DoubH} = 0$) all nodes which are connected to the district heating network cannot provide local heating anymore.</p>
+<p>If no double heating is allowed (<span class="math notranslate nohighlight">\(\delta^{DoubH} = 0\)</span>) all nodes which are connected to the district heating network cannot provide local heating anymore.</p>
 <div class="math notranslate nohighlight">
 \[q^{\text{local}}_{n,h} \leq
 (1 - z^{\text{DH}}_n) \cdot P^{\max}_n

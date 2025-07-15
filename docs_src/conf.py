@@ -18,7 +18,6 @@ release = '1.0.0'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
@@ -37,3 +36,12 @@ language = 'python'
 
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+
+html_theme_options = {
+    "style_external_links": True,
+}
+
+html_css_files = [
+    'https://fonts.googleapis.com/css?family=Roboto+Slab:400,700|Lato:400,700&display=swap',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
+]
