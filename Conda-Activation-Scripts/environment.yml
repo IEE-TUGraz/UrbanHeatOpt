@@ -1,6 +1,0 @@
-name: example_env
-channels:
-  - defaults
-dependencies:
-  - pip=24.0
-  - python=3.12.2
