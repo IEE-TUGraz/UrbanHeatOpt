@@ -132,6 +132,7 @@ def extract_relevat_data(gdf_in: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # extract the relevant data from the raw geodata that are needed for further analysis
     cprint("Start: Extracting relevant data from the raw geodata")
     # copy the gemetry coulumn
+    print(gdf_in.head())
     gdf_out = gdf_in[['geometry']].copy()
 
     # add a unique id for each building

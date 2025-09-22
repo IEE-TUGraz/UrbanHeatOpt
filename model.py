@@ -78,6 +78,7 @@ class HeatNetworkModel(ConcreteModel):
         self.pCostPumping = Param(initialize=dict_parameter_cost['pCostPumping']) 
         self.pTsupply = Param(initialize=dict_parameter_cost['pTsupply'])
         self.pTreturn = Param(initialize=dict_parameter_cost['pTreturn'])
+        self.phWeight = Param(initialize=dict_parameter_cost['phWeight'])
 
         self.pPipeCostIni = Param(initialize=dict_parameter_cost['pPipeCostIni'])
         self.pPipeCostSlope = Param(initialize=dict_parameter_cost['pPipeCostsSlope'])
@@ -286,7 +287,7 @@ class HeatNetworkModel(ConcreteModel):
                 sum(model.pCostTESInv[tes] * model.vTESCapacitivInv[tes] for tes in model.tes) +
                 sum(model.pPipeCostIni * model.pPipeLength[n, m] * model.vBinBuildPipe[n, m] for (n, m) in model.pPipeLength) +
                 sum(model.pPipeCostSlope * model.pPipeLength[n, m] * model.vPipeMassFlowInv[n, m] for (n, m) in model.pPipeLength) +  # tbd add variable slope price
-                sum(model.hourly_cost[h] for h in model.h)
+                sum(model.hourly_cost[h] for h in model.h) * model.phWeight
             )
         self.obj = Objective(rule=objective_function, sense=minimize)
 
@@ -402,7 +403,7 @@ class HeatNetworkModel(ConcreteModel):
         # calculate the heat production of the TES
         def tes_production_rule(model, tes, h):
             return (
-                model.vCentralHeatProd[tes, h] == model.vTESDischarge[tes, h] * (model.pTsupply - model.pTreturn) * model.pCWater
+                model.vCentralHeatProd[tes, h] == model.vTESDischarge[tes, h] * model.phWeight * (model.pTsupply - model.pTreturn) * model.pCWater
             )
         self.tes_production = Constraint(self.tes, self.h, rule=tes_production_rule)
 
@@ -443,9 +444,9 @@ class HeatNetworkModel(ConcreteModel):
         start = time.time()
         # Balance equation for the TES
         def tes_balance_rule(model, tes, h):
-            if h == 1: return model.vTESLevel[tes, h] == model.vTESLevel[tes, len(model.h)] + model.vTESCharge[tes, h] - model.vTESDischarge[tes, h]
+            if h == 1: return model.vTESLevel[tes, h] == model.vTESLevel[tes, len(model.h)] + model.vTESCharge[tes, h] * model.phWeight - model.vTESDischarge[tes, h] * model.phWeight
             return (
-                model.vTESLevel[tes, h] == model.vTESLevel[tes, h-1] * (1 - model.pTESlosses) + model.vTESCharge[tes, h] - model.vTESDischarge[tes, h]
+                model.vTESLevel[tes, h] == model.vTESLevel[tes, h-1] * (1 - model.pTESlosses) + model.vTESCharge[tes, h] * model.phWeight - model.vTESDischarge[tes, h] * model.phWeight
             )
         self.tes_balance = Constraint(self.tes, self.h, rule=tes_balance_rule)
 
