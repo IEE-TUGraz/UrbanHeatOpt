@@ -55,11 +55,8 @@ window.addEventListener("load", () => mermaid.run());
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#main-features">Main Features</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#general-framework">General Framework</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#main-features">Main Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#general-framework">General Framework</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
@@ -94,27 +91,24 @@ window.addEventListener("load", () => mermaid.run());
              
   <section id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>Welcome to UrbanHeatOpt!</p>
 <p><strong>UrbanHeatOpt</strong> is designed to support heat energy planning at the community level using publically available data sources.
 It provides a flexible framework for estimating heat demand, generating detailed heat demand time series, and evaluating the potential for waste heat utilization through district heating networks using linear optimization.</p>
 <section id="main-features">
-<h3>Main Features<a class="headerlink" href="#main-features" title="Link to this heading"></a></h3>
+<h2>Main Features<a class="headerlink" href="#main-features" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p><strong>Stochastic heat demand modeling</strong>: Generates building-level heat demand time series using probabilistic models.</p></li>
+<li><p><strong>Heat demand time series generation</strong>: Generates building-level heat demand time series using a probabilistic approach.</p></li>
 <li><p><strong>District heating network proposals</strong>: Offers clustering and greenfield network planning based on spatial and energy criteria.</p></li>
 <li><p><strong>Waste heat utilization assessment</strong>: Evaluates the feasibility of integrating local waste heat sources.</p></li>
 </ul>
 </section>
 <section id="general-framework">
-<h3>General Framework<a class="headerlink" href="#general-framework" title="Link to this heading"></a></h3>
-<p>The tool is structured into four modular components:</p>
+<h2>General Framework<a class="headerlink" href="#general-framework" title="Link to this heading"></a></h2>
+<p>The tool is structured into four modular software components:</p>
 <ol class="arabic simple">
 <li><p><strong>Prepare geodata</strong>
 Accesses building geometry and attributes from OpenStreetMap (OSM) and estimates annual heating demands based on building typologies.</p></li>
 <li><p><strong>Generate heat demand time series</strong>
-Calculates dynamic heat demand profiles through thermal modeling combined with active occupancy simulations.</p></li>
+Calculates heat demand profiles through thermal modeling combined with active occupancy simulations.</p></li>
 <li><p><strong>Cluster heat demand and propose networks</strong>
 Performs spatial clustering of buildings to suggest candidate district heating networks, considering both technical and spatial factors.</p></li>
 <li><p><strong>Optimize waste heat utilization</strong>
@@ -127,10 +121,8 @@ Applies a linear optimization model to maximize the utilization of available was
    B --&gt; C[&quot;2 Generate Heat Demand&quot;]
    C --&gt; D[&quot;3 Cluster + Prop. Network&quot;]
    D --&gt; E[&quot;4 Optimization Model&quot;]
-    </pre></div><p>Each module is designed to be modular and flexible.
-All intermediate results are stored in easily accessible and standardized data formats, allowing users to leverage the outputs for other applications and custom workflows.</p>
-<p>For detailed technical information, please refer to the respective sections.</p>
-</section>
+    </pre></div><p>Each module is designed to be flexible and reusable, allowing for customization or implementation of parts in other projects.
+All intermediate results are stored in easily accessible, standardized data formats, enabling users to leverage the outputs for other applications and custom workflows.</p>
 </section>
 </section>
 

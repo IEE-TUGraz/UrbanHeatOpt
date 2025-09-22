@@ -6,8 +6,8 @@
 Welcome to UrbanHeatOpt!
 ========================
 
-Here you can find a complete documentation of the use of UrbanHeatOpt: A Software Framework for Supporting Municipal Heat Transition Planning.
-For more details please go to the following sections.
+This documentation explains how to use UrbanHeatOpt: A Software Framework for Supporting Municipal Heat Transition Planning.
+For more details, see the sections below.
 
 .. toctree::
    :maxdepth: 2

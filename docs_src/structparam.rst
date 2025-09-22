@@ -4,7 +4,13 @@
 Project Structure and Settings
 ==============================
 
-In this section, you will find an overview of the project's general structure, the required formats for all input data, and the available settings and parameters you can adjust to customize your analysis.
+In this section, you will find an overview of the project's general structure from a user perspective, the required formats for all input data, and the available settings and parameters that can be adjusted to customize your analysis.
+
+.. seealso::
+
+   For more details on the conceptual model design, the complete mathematical formulation, 
+   time horizons for input data, or aggregation, please refer to the Supplementary Material: 
+   `https://doi.org/10.3217/7ep0n-27377 <https://doi.org/10.3217/7ep0n-27377>`_.
 
 
 
@@ -161,9 +167,11 @@ Each row represents a waste heat unit with the following columns:
 - ``unit``: Name (must match a column name in ``input_WastHeatProfiles.xlsx``)
 - ``lat``, ``lon``: Coordinates of the unit
 - ``isWH``, ``isBoiler``, ``isTES``: Binary (1/0) to define unit type
-  - ``isWH`` = Waste Heat Unit (profile limited)
-  - ``isBoiler`` = Dispatchable boiler (e.g., gas, P2H, HP)
-  - ``isTES`` = Thermal energy storage
+
+   - ``isWH`` = Waste Heat Unit (profile limited)
+   - ``isBoiler`` = Dispatchable boiler (e.g., gas, P2H, HP)
+   - ``isTES`` = Thermal energy storage
+   
 - ``O&M and Fuel Costs``: €/kWh (already efficiency-adjusted)
 - ``Power Investment Costs``: €/kW (annualized)
 - ``Storage Investment Costs``: €/m³ (only for TES)
@@ -183,78 +191,101 @@ Parameter and Cost Definitions
 
 File: ``[case_study_name]/[scenario_name]/input/input_ParameterCosts.xlsx``
 
-All adjustable technical and financial parameters are defined here:
+All adjustable technical and financial parameters are defined in the following table.  
+The names correspond to the naming in the code.  
+The default values provide rough estimations and should be adapted for the specific case study.  
 
-.. list-table:: Parameters
-   :widths: 30 20 15 35
+
+
+.. list-table:: 
+   :widths: 30 15 10 10 35
    :header-rows: 1
 
    * - Name
      - Parameter
+     - Default value
      - Unit
      - Description
    * - Costs for non-supplied heat
-     - pCostHNS = 100
+     - pCostHNS
+     - 100
      - €/kWh
-     - Penalty for unmet demand
+     - Penalty for unmet heat demand
    * - Pumping costs
-     - pCostPumping = 0.00001
-     - €/m³
+     - pCostPumping
+     - 0.00001
+     - €/(m³/m)
      - Energy cost for water circulation
    * - Supply temperature
-     - pTsupply = 90
-     - °C
+     - pTsupply
+     - 90
+     - °C (or K)
      - Constant level for supply
    * - Return temperature
-     - pTreturn = 55
-     - °C
+     - pTreturn
+     - 55
+     - °C (or K)
      - Constant level for return
    * - Pipe base investment cost
-     - pPipeCostIni = 14.16
+     - pPipeCostIni
+     - 14.16
      - €/m
      - Base cost for installing pipes
    * - Initial pipe flow capacity
-     - pMassFlowIni = 0.8
+     - pMassFlowIni
+     - 0.8
      - m³/h
      - Smallest pipe capacity
    * - Pipe cost slope
-     - pPipeCostsSlope = 0.133
-     - €/m·m³/h
+     - pPipeCostsSlope
+     - 0.133
+     - €/(m m³/h)
      - Cost per flow unit
    * - Number of heat clusters
-     - param_cluster_size = 80
-     - -
+     - param_cluster_size
+     - 80
+     - none
      - Number of demand clusters
    * - Connection cost per building
-     - cost_DH_connect_building = 83.33
+     - cost_DH_connect_building
+     - 83.33
      - €/building
      - Fixed connection cost
    * - Area-based network investment
-     - cost_DH_connect_area = 1.416
+     - cost_DH_connect_area
+     - 1.416
      - €/m²
      - For in-cluster piping
    * - Power-based connection cost
-     - cost_DH_connect_power = 9.17
+     - cost_DH_connect_power
+     - 9.17
      - €/kW
      - Installed capacity cost
    * - Hot water demand
-     - daily_hot_water_demand = 5
+     - daily_hot_water_demand
+     - 5
      - kWh/dwelling/day
      - Constant domestic hot water usage
    * - Restrict dual heating
-     - allow_double_heating = 0
+     - allow_double_heating
+     - 0
      - Binary (0/1)
      - 0 = buildings connected to district heating may not use decentral heating
+   * - Time step durration
+     - phWeight
+     - 1
+     - h
+     - weight of the timestep
 
  
  
-
-
  
+ 
+  
 References
  .. [Tabula] https://webtool.building-typology.eu/#bm
  .. [Renewables.ninja] https://www.renewables.ninja/
- .. [MCMC-Process] `doi:10.3217/0b20r-jrx54 <doi:10.3217/0b20r-jrx54>`_
+ .. [MCMC-Process] `https://doi.org/10.1016/j.segy.2025.100181 <https://doi.org/10.1016/j.segy.2025.100181>`_
 
 
 
@@ -274,358 +305,3 @@ Two solvers are preconfigured by default:
 > While HiGHS works reliably for most scenarios, Gurobi is typically much faster, especially for larger or more complex optimization problems.
 
 
- 
-Optimization Model Formulation
-------------------------------
-The optimisation model (model module) used to finde the best configuration is described here. 
-
-Sets
-~~~~
-
-.. list-table:: Model sets
-   :widths: 20 40 40
-   :header-rows: 1
-
-   * - **Name**
-     - **Meaning**
-     - **Symbol**
-   * - n
-     - Heat nodes
-     - :math:`n`
-   * - h
-     - (hourly) Time index
-     - :math:`h`
-   * - pc
-     - Pipe candidate connections
-     - :math:`pc`
-   * - hg
-     - Heat generation units
-     - :math:`hg`
-   * - hgn
-     - Assignment of heat generation units to heat nodes
-     - :math:`hgn(hg,n)`
-   * - tes
-     - Thermal energy storage units
-     - :math:`tes \in hg`
-   * - hb
-     - Heat boilers
-     - :math:`hb \in hg`
-   * - wh
-     - Waste heat unit
-     - :math:`wh \in hg`
-
-Parameters
-~~~~~~~~~~
-These parameters are initialied based on the input data give in the scenario.
-
-
-.. list-table:: Model parameters
-   :widths: 20 40 20 20
-   :header-rows: 1
-
-   * - **Name**
-     - **Meaning**
-     - **Symbol**
-     - **Units**
-   * - pCostHNS
-     - Cost of heat not supplied
-     - :math:`C^{\text{HNS}}`
-     - €/kWh
-   * - pCostPumping
-     - Pumping cost
-     - :math:`C^{\text{pump}}`
-     - €/m³
-   * - pTsupply
-     - Supply temperature
-     - :math:`T^{\text{sup}}`
-     - °C
-   * - pTreturn
-     - Return temperature
-     - :math:`T^{\text{ret}}`
-     - °C
-   * - pPipeCostIni
-     - Initial pipe cost
-     - :math:`C^{\text{pipe}}_0`
-     - €
-   * - pPipeCostSlope
-     - Pipe cost slope
-     - :math:`C^{\text{pipe}}_\text{slope}`
-     - €/m m³/h
-   * - pMassFlowIni
-     - Initial mass flow
-     - :math:`\dot{m}^{\text{ini}}`
-     - m³/h
-   * - pAllowDoubleHeating
-     - Allow double heating
-     - :math:`\delta^{\text{DoubH}}`
-     - 0/1
-   * - pTESlosses
-     - Thermal energy storage losses
-     - :math:`\eta^{\text{loss}}_{\text{TES}}`
-     - -
-   * - pCWater
-     - Specific heat capacity of water
-     - :math:`c_p^{\text{water}}`
-     - kWh/(kg·K)
-   * - pHeatDemand
-     - Heat demand per heat node and hour
-     - :math:`D_{n,h}`
-     - kWh
-   * - pCostDHConnect
-     - Cost of DH connection per node
-     - :math:`C^{\text{DH}}_n`
-     - €
-   * - pMaxDHPower
-     - Max district heating power per node
-     - :math:`P^{\max}_{n}`
-     - kW
-   * - pCostLocalHeatProd
-     - Cost of local heat production
-     - :math:`C^{\text{local}}_n`
-     - €/kWh
-   * - pPipeLength
-     - Length of pipe connection
-     - :math:`L_{n,m}`
-     - m
-   * - pMaxWHMF
-     - Max waste heat mass flow
-     - :math:`\dot{m}^{\max}_{hg,t}`
-     - m³/h
-   * - pCostCentrHeatProd
-     - Cost of central heat production
-     - :math:`C^{\text{centr}}_{hg}`
-     - €/kWh
-   * - pCostCentralHeatProdInv
-     - Invest. cost for central heat production
-     - :math:`C^{\text{centr,inv}}_{hg}`
-     - €/kW
-   * - pCostTESInv
-     - Investment cost for TES
-     - :math:`C^{\text{TES,inv}}_{tes}`
-     - €/kWh
-
-Variables
-~~~~~~~~~
-
-.. list-table:: Model variables
-   :widths: 20 40 20 20
-   :header-rows: 1
-
-   * - **Name**
-     - **Meaning**
-     - **Symbol**
-     - **Units**
-   * - vMF
-     - Mass flow in pipes
-     - :math:`\dot{m}_{n,m,h}`
-     - m³/h
-   * - vHNS
-     - Non supplied heat to thermal nodes
-     - :math:`q^\text{HNS}_{n,h}`
-     - kWh
-   * - vLocalHeatProd
-     - Locally produced heat
-     - :math:`q^{\text{local}}_{n,h}`
-     - kWh
-   * - vMFConsumption
-     - Mass flow consumed at node
-     - :math:`\dot{m}^{\text{cons}}_{n,h}`
-     - m³/h
-   * - vMFInjection
-     - Mass flow injected at node
-     - :math:`\dot{m}^{\text{inj}}_{n,h}`
-     - m³/h
-   * - vCentralHeatProd
-     - Central heat production
-     - :math:`q^{\text{centr}}_{hg,h}`
-     - kWh
-   * - vCentralHeatProdInv
-     - Investment in central heat production
-     - :math:`x^{\text{centr}}_{hg}`
-     - kW
-   * - vTESLevel
-     - TES level
-     - :math:`e_{tes,h}`
-     - m³
-   * - vTESCharge
-     - TES charging
-     - :math:`\dot{m}^{\text{ch}}_{tes,h}`
-     - m³/h
-   * - vTESDischarge
-     - TES discharging
-     - :math:`\dot{m}^{\text{dch}}_{tes,h}`
-     - m³/h
-   * - vTESCapacitivInv
-     - Investment in TES capacity
-     - :math:`x^{\text{TES}}_{tes}`
-     - m³
-   * - vPipeMassFlowInv
-     - Investment in pipe mass flow capacity
-     - :math:`x^{\text{pipe}}_{n,m}`
-     - m³/h
-   * - vDHconnect
-     - Investment in district heat connection
-     - :math:`z^{\text{DH}}_n`
-     - binary
-   * - vBinBuildPipe
-     - Build pipe decision
-     - :math:`z^{\text{pipe}}_{n,m}`
-     - binary
-
-Objective Function
-~~~~~~~~~~~~~~~~~~
-**Hourly Cost Expression**
-
-The hourly costs function hOF:sub:`h` is used to sum up all hourly contributions to the total costs, i.e. operational costs. 
-
-.. math::
-
-   \text{hOF}_h =
-   \sum_{n} C^{\text{HNS}} \cdot q^\text{HNS}_{n,h} +
-   \sum_{n} C^{\text{local}}_n \cdot q^{\text{local}}_{n,h} +
-   \sum_{hg} C^{\text{centr}}_{hg} \cdot q^{\text{centr}}_{hg,h} + \\
-   \sum_{(n,m) \in pc} C^{\text{pump}} \cdot L_{n,m} \cdot \dot{m}_{n,m,h}
-   \quad \forall h
-
-**Total Cost Objective**
-
-The objective of the optimisation model is to minimize all operational and investment costs. 
-
-.. math::
-
-   \min \left(
-   \sum_{n} C^{\text{DH}}_n \cdot z^{\text{DH}}_n +
-   \sum_{hg} C^{\text{centr,inv}}_{hg} \cdot x^{\text{centr}}_{hg} +
-   \sum_{tes} C^{\text{TES,inv}}_{tes} \cdot x^{\text{TES}}_{tes} + \right. \\
-   \left.
-   \sum_{(n,m) \in pc} C^{\text{pipe}}_0 \cdot L_{n,m} \cdot z^{\text{pipe}}_{n,m} +
-   \sum_{(n,m) \in pc} C^{\text{pipe}}_\text{slope} \cdot L_{n,m} \cdot x^{\text{pipe}}_{n,m} +
-   \sum_{h} \text{hOF}_h
-   \right)
-
-Constraints
-~~~~~~~~~~~
-
-**Energy Balance**
-
-The energy balance for every hour ensures that the demand minus local heating has to be supplied by a mass flow consumption from the network. 
-
-.. math::
-
-   \dot{m}^{\text{cons}}_{n,h} =
-   \frac{D_{n,h} - q^{\text{local}}_{n,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
-   \quad \forall n,h
-
-**Max District Heating Power**
-
-A consumption from the district heating network is only possible when the connection is established. 
-
-.. math::
-
-   \dot{m}^{\text{cons}}_{n,h} \leq
-   z^{\text{DH}}_n \cdot \frac{P^{\max}_n}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
-   \quad \forall n,h
-
-**Mass Flow Balance**
-
-The total mass flow in every node must be conserved. 
-
-.. math::
-
-   \dot{m}^{\text{cons}}_{n,h} +
-   \sum_{hgn(tes,n)} \dot{m}^{\text{ch}}_{tes,h}
-   - \dot{m}^{\text{inj}}_{n,h} =
-   \sum_{(m,n) \in pc} \dot{m}_{m,n,h} -
-   \sum_{(n,m) \in pc} \dot{m}_{n,m,h}
-   \quad \forall n,h
-
-**Mass Flow Injection**
-
-The mass flow injection to the network equals the sum of all generation unit mass flows at this node. 
-
-.. math::
-
-   \dot{m}^{\text{inj}}_{n,h} =
-   \sum_{hgn(wh,n)} \frac{q^{\text{centr}}_{wh,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}} +
-   \sum_{hgn(hb,n)} \frac{q^{\text{centr}}_{hb,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}} + \\
-   \sum_{hgn(tes,n)} \frac{q^{\text{centr}}_{tes,h}}{(T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}}
-   \quad \forall n,h
-
-**Local Production Exclusion (No Double Heating)**
-
-If no double heating is allowed (:math:`\delta^{DoubH} = 0`) all nodes which are connected to the district heating network cannot provide local heating anymore. 
-
-.. math::
-
-   q^{\text{local}}_{n,h} \leq
-   (1 - z^{\text{DH}}_n) \cdot P^{\max}_n
-   \quad \text{if } \delta^{DoubH} = 0
-   \quad \forall n,h
-
-**Max Waste Heat Power**
-
-The available waste heat mass flow in every time step limits the heat power output for waste heat units. 
-
-.. math::
-
-   q^{\text{centr}}_{wh,h} \leq
-   \dot{m}^{\max}_{wh,h} \cdot (T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}
-   \quad \forall wh,h
-
-**TES Discharge Conversion**
-
-Defines the heat power output of TES from the mass flow. 
-
-.. math::
-
-   q^{\text{centr}}_{tes,h} =
-   \dot{m}^{\text{dch}}_{tes,h} \cdot (T^{\text{sup}} - T^{\text{ret}}) \cdot c_p^{\text{water}}
-   \quad \forall tes,h
-
-**Max Heat Generation by Investment**
-
-Limits the heat generation of all heat generation units to the installed capacity by investments. 
-
-.. math::
-
-   q^{\text{centr}}_{hg,h} \leq x^{\text{centr}}_{hg}
-   \quad \forall hg,h
-
-**TES Capacity by Investment**
-
-Limits the storage level of the TES to the invested storage size. 
-
-.. math::
-
-   e_{tes,h} \leq x^{\text{TES}}_{tes}
-   \quad \forall tes,h
-
-**TES Energy Balance**
-
-Time-linking storage level constraint. 
-
-.. math::
-
-   e_{tes,h} =
-   \begin{cases}
-   e_{tes,|H|} + \dot{m}^{\text{ch}}_{tes,h} - \dot{m}^{\text{dch}}_{tes,h}, & \text{if } h = 1 \\
-   e_{tes,h-1} \cdot (1 - \eta^{\text{loss}}_{\text{TES}}) + \dot{m}^{\text{ch}}_{tes,h} - \dot{m}^{\text{dch}}_{tes,h}, & \text{otherwise}
-   \end{cases}
-   \quad \forall tes,h
-
-**Max Pipe Mass Flow**
-
-Limits the mass flow through the pipes to the investments into pipes (initial investment for the smallest pipe diameter plus continuous investment for higher mass flow).
-
-.. math::
-
-   \dot{m}_{n,m,h} \leq z^{\text{pipe}}_{n,m} \cdot \dot{m}^{\text{ini}} + x^{\text{pipe}}_{n,m}
-   \quad \forall n,m \in pc, \forall h
-
-**Logical Pipe Mass Flow Constraint**
-
-Restricts the increased mass flow investment (for larger diameters) to pipes where the initial investment was made. 
-
-.. math::
-
-   x^{\text{pipe}}_{n,m} \leq z^{\text{pipe}}_{n,m} \cdot M

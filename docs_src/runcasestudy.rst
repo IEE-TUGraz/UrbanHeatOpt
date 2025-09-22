@@ -3,9 +3,13 @@
 Run a Case Study
 ----------------
 
+This tutorial guides you step-by-step in using the software to run a case study on your own, providing a hands-on introduction to its main features.  
+Instead of focusing on the details of a specific technical case study, it emphasizes practical guidance to help you explore your own scenarios and workflows independently.
+
+If you are interested in the data format and typical results, please refer to the example case in the repository, which provides the full input data and several output files for an actual case study.
+
 To run a case study, we recommend using the Jupyter notebook ``main.ipynb``, where the full workflow is documented. Alternatively, you can call the functions from the command line or include them in a customized script.
 
-The following steps illustrate how to run a new case study step by step.
 
 1. Environment and Packages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +36,7 @@ First, define a name for your case study, which will be used to identify all ass
 Next, specify the geographical location and extent of the case study using one of two methods:
 
 - **(i) Named location**: Any uniquely defined region in OpenStreetMap (OSM) can be used, such as "Berlin, Germany".
-- **(ii) Geoshape**: Any valid polygon can be used. For convenience, use the helper function:
+- **(ii) Geoshape**: Any valid geopolygon (e.g., a custom shapefile of the desired location) can be used.  For convenience, you can use the helper function:
 
   .. code-block:: python
 
@@ -136,4 +140,5 @@ You can adjust:
 
 - ``time_invervall``: 'H' (hourly), 'D' (daily), 'W' (weekly), or 'M' (monthly)
 - ``start_hour`` and ``duration_hours``: Time window for zooming into specific periods.
+
 

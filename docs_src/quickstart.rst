@@ -3,10 +3,18 @@ Quickstart
 
 .. _env_setup:
 
+
+Requirements
+------------
+
+- **Anaconda** for package management
+- **Python version**: >= 3.8
+- **Packages**: All required packages are listed in the ``environment.yml`` file.
+
 Environment Setup
 -----------------
 
-Before running **[Fancy Tool Name]**, ensure that the necessary environment is prepared.
+Before running **UrbanHeatOpt**, ensure that the necessary environment is prepared.
 
 1. **Using the provided script to activate the environment**:
 
@@ -19,15 +27,10 @@ Before running **[Fancy Tool Name]**, ensure that the necessary environment is p
    .. code-block:: bash
 
       conda env create -f environment.yml
-      conda activate [your_environment_name]
+      conda activate urbanheatopt_env
 
 Make sure to run all scripts and functions **within the activated environment** to ensure proper functionality.
 
-Requirements
-------------
-
-- **Python version**: >= 3.8
-- **Packages**: All required packages are listed in the ``environment.yml`` file.
 
 Running the Code
 ----------------
@@ -43,40 +46,15 @@ For more details on available parameters and customizations, refer to the sectio
 Using the Functions in a Python Script
 --------------------------------------
 
-If you prefer to use the modules directly in your own Python scripts, the following functions are available:
+If you prefer to use the modules directly in your own Python scripts, you need to import the following modules:
 
 .. code-block:: python
 
-   prepare_geodata.generate_complete_geodataset(case_study_name, location)
+   import prepare_geodata
+   import hd_time_series_generator
+   import clustering
+   import model
+   import visualisation
 
-Generates a full geodata dataset for the specified location.
-
-- ``location`` can either be the name of a place known to OpenStreetMap or a geopolygon.
-- The resulting dataset is stored as a ``.geojson`` file in the folder named after ``case_study_name``.
-
-.. code-block:: python
-
-   hd_time_series_generator.fast_TS_generator(case_study_name, True)
-
-Generates heat demand time series for all buildings in the ``buildings.geojson`` file. The time series are saved as ``.csv`` files in the corresponding ``case_study_name`` directory.
-
-.. code-block:: python
-
-   clustering.perform_complete_clustering(case_study_name, scenario_name)
-
-Clusters the buildings and proposes a district heating network.
-- The clustered data and network proposal are prepared for the optimization model.
-- Results are saved in the folder specified by ``scenario_name``.
-
-.. code-block:: python
-
-   model.run_model(case_study_name, scenario_name)
-
-Runs the complete optimization model to find the optimal heating configuration based on given options and parameters.
-
-- Results, along with figures, are stored in the folder named after ``scenario_name``.
-- For further details about available settings and adjustments, see the section :ref:`struct_param`.
-
-
-
-
+Subsequently, you can use the functions of these modules.  
+Details on their usage can be found in the documentation of the modules.
