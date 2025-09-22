@@ -40,8 +40,6 @@ Only the **output files** (e.g., results) corresponding to the executed step are
 
 The general folder structure is organized as follows:
  
-Project Structure
------------------
  
 ::
 
